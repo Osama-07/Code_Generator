@@ -1,0 +1,38 @@
+            StringBuilder code = new StringBuilder();
+
+            // Generate Delete Record (DELETE) Code
+            code.AppendLine($"public static bool Delete{txtTableName.Text}(int id)");
+            code.AppendLine("{");
+            code.AppendLine("    bool Deleted = false;");
+            code.AppendLine("");
+            code.AppendLine($"    string query = @\"DELETE FROM {txtTableName.Text}");
+            code.AppendLine("                         WHERE ID = @ID\";");
+            code.AppendLine("");
+            code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
+            code.AppendLine("    {");
+            code.AppendLine("        using (SqlCommand Command = new SqlCommand(query, Connection))");
+            code.AppendLine("        {");
+            code.AppendLine("            Command.Parameters.AddWithValue(\"@ID\", id);");
+            code.AppendLine("");
+            code.AppendLine("            try");
+            code.AppendLine("            {");
+            code.AppendLine("                Connection.Open();");
+            code.AppendLine("");
+            code.AppendLine("                Command.ExecuteNonQuery();");
+            code.AppendLine("");
+            code.AppendLine("                Deleted = true;");
+            code.AppendLine("            }");
+            code.AppendLine("            catch(Exception ex)");
+            code.AppendLine("            {");
+            code.AppendLine("                MessageBox.Show($\"Error: + {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
+            code.AppendLine("                Deleted = false;");
+            code.AppendLine("            }");
+            code.AppendLine("            finally");
+            code.AppendLine("            {");
+            code.AppendLine("                Connection.Close();");
+            code.AppendLine("            }");
+            code.AppendLine("        }");
+            code.AppendLine("    }");
+            code.AppendLine("");
+            code.AppendLine("    return Deleted;");
+            code.AppendLine("}");

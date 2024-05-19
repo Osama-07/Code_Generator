@@ -1,0 +1,78 @@
+StringBuilder code = new StringBuilder();
+
+// Generate Update Record (UPDATE) Code
+code.Append($"public static bool Update{TableName}(");
+
+for (int i = 0; i < Parameters.Lines.Count(); i++)
+{
+    if (i == Parameters.Lines.Count() - 1)
+    {
+        code.Append($"{Parameters.Lines[i]}"); // without seperator in last parameter.
+        break;
+    }
+
+    code.Append($"{Parameters.Lines[i]}, ");
+}
+
+code.AppendLine(")");
+code.AppendLine("{");
+code.AppendLine("    bool Updated = false;");
+code.AppendLine();
+code.AppendLine($"    string query = @\"UPDATE {TableName}");
+code.AppendLine("                           SET ");
+
+for (int i = 0; i < Parameters.Lines.Count(); i++)
+{
+    string[] Text = Parameters.Lines[i].Split(' ');
+
+    if (i == Parameters.Lines.Count() - 1)
+    {
+        code.AppendLine($"                              {Text[1]} = @{Text[1]}");
+        break;
+    }
+
+    code.AppendLine($"                              {Text[1]} = @{Text[1]},");
+}
+
+code.AppendLine("                           WHERE ID = @ID\"; // Here Primary key ID of the table");
+code.AppendLine("");
+code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
+code.AppendLine("    {");
+code.AppendLine("        using (SqlCommand Command = new SqlCommand(query, Connection))");
+code.AppendLine("        {");
+
+for (int i = 0; i < Parameters.Lines.Count(); i++)
+{
+    string[] Text = Parameters.Lines[i].Split(' ');
+
+    code.AppendLine($"          Command.Parameters.AddWithValue(\"@{Text[1]}\", {Text[1]});");
+}
+
+code.AppendLine("");
+code.AppendLine("            try");
+code.AppendLine("            {");
+code.AppendLine("                Connection.Open();");
+code.AppendLine("");
+code.AppendLine("                Command.ExecuteNonQuery();");
+code.AppendLine("");
+code.AppendLine("                Updated = true;");
+code.AppendLine("            }");
+code.AppendLine("            catch(Exception ex)");
+code.AppendLine("            {");
+code.AppendLine("                MessageBox.Show(\"Error: \" + ex.Message, \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
+code.AppendLine("");
+code.AppendLine("                Updated = false;");
+code.AppendLine("            }");
+code.AppendLine("            finally");
+code.AppendLine("            {");
+code.AppendLine("                Connection.Close();");
+code.AppendLine("            }");
+code.AppendLine("");
+code.AppendLine("            return Updated;");
+code.AppendLine("        }");
+code.AppendLine("    }");
+code.AppendLine("}");
+
+code.AppendLine();
+
+return code.ToString();

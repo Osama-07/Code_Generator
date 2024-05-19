@@ -1,0 +1,23 @@
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Code Generator Business.dll
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Code Generator Business.pdb
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Generator Code Data.dll
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Generator Code Data.pdb
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.csproj.AssemblyReference.cache
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.csproj.CoreCompileInputs.cache
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.dll
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.pdb
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Util.dll
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Util.pdb
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\bin\Debug\Util.dll.config
+C:\Users\TOSHIBA\Desktop\My Code Generator\Code Generator Business\obj\Debug\Code Gen.6281E54C.Up2Date
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\bin\Debug\Code Generator Business.dll
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\bin\Debug\Code Generator Business.pdb
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\bin\Debug\Generator Code Data.dll
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\bin\Debug\Generator Code Data.pdb
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\bin\Debug\Util.pdb
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\bin\Debug\Util.dll.config
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.csproj.AssemblyReference.cache
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.csproj.CoreCompileInputs.cache
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\obj\Debug\Code Gen.6281E54C.Up2Date
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.dll
+C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\Code Generator Business\obj\Debug\Code Generator Business.pdb

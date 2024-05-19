@@ -1,0 +1,26 @@
+﻿using My_Code_Generator.Forms;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace My_Code_Generator
+{
+    internal static class Program
+    {
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            //Application.Run(new frmDataAccessLayer());
+            Application.Run(new frmMainMenue());
+            //Application.Run(new frmKOKO());
+        }
+
+    }
+}
