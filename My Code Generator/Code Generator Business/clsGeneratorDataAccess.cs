@@ -1,10 +1,6 @@
-﻿using Generator_Code_Data;
-using System;
-using System.Data.SqlClient;
-using System.Data;
+﻿
 using System.Text;
-using System.Windows.Forms;
-using Util;
+
 
 namespace Code_Generator_Business
 {

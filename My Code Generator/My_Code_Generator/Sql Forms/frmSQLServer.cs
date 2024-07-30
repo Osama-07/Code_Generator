@@ -1,6 +1,9 @@
 ﻿using Code_Generator_Business;
+using Generator_Code_Data;
 using My_Code_Generator.Sql_Forms;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,25 +20,29 @@ namespace My_Code_Generator.Forms
             _frmMainSqlScreen = frmMainSqlScreen;
         }
 
+        public List<DatabaseSchema> databaseSchemas { get; set; }
+
         private void _GetDatabases()
         {
-            string[] databasesName = clsGetDatabasesInformation.GetDatabases();
-
-            for (int i = 0; i < databasesName.Length; i++)
+            foreach (var database in databaseSchemas.OrderBy(d => d.DatabaseName))
             {
-                cmbDatabases.Items.Add(databasesName[i]);
+                cmbDatabases.Items.Add(database.DatabaseName);
             }
 
-            cmbDatabases.SelectedIndex = 0;
+            if (cmbDatabases.Items.Count > 0)
+                cmbDatabases.SelectedIndex = 0;
         }
 
         private void _GetTables(string SelectedDatabase)
         {
-            string[] tablesName = clsGetDatabasesInformation.GetTables(SelectedDatabase);
+            var database = databaseSchemas.Find(d => d.DatabaseName == SelectedDatabase);
 
-            for (int i = 0; i < tablesName.Length; i++)
+            if (database != null)
             {
-                cmbTables.Items.Add(tablesName[i]);
+                foreach (var table in database.Tables.OrderBy(t => t.TableName))
+                {
+                    cmbTables.Items.Add(table.TableName);
+                }
             }
 
             cmbTables.SelectedIndex = 0;
@@ -43,14 +50,19 @@ namespace My_Code_Generator.Forms
 
         private void _GetColumns(string selectedDatabase, string tableName)
         {
-            string[,] Columns = clsGetDatabasesInformation.GetColumns(selectedDatabase, tableName);
+            var database = databaseSchemas.Find(d => d.DatabaseName == selectedDatabase);
 
-            for (int i = 0; i < Columns.GetLength(0); i++)
+            if (database != null)
             {
-                if (Columns[i, 1] == null)
-                    break;
+                var tables = database.Tables.Find(t => t.TableName == tableName);
 
-                cmbColumns.Items.Add(Columns[i, 1]);
+                if (tables != null)
+                {
+                    foreach (var column in tables.Columns)
+                    {
+                        cmbColumns.Items.Add(column.ColumnName);
+                    }
+                }
             }
 
             cmbColumns.SelectedIndex = 0;
@@ -58,7 +70,9 @@ namespace My_Code_Generator.Forms
 
         private void frmSQLServer_Shown(object sender, EventArgs e)
         {
-            Parallel.Invoke(_GetDatabases);
+            databaseSchemas = clsDatabaseInfoData.GetAllDatabaseSchemas();
+
+            _GetDatabases();
         }
 
         private void cmbDatabases_SelectedIndexChanged(object sender, EventArgs e)
@@ -81,12 +95,12 @@ namespace My_Code_Generator.Forms
 
         private void btnGenerateSQLCode_Click(object sender, EventArgs e)
         {
-            string SelectedDatabase = cmbDatabases.SelectedItem.ToString();
+            /*string SelectedDatabase = cmbDatabases.SelectedItem.ToString();
             string SelectedTable = cmbTables.SelectedItem.ToString();
 
-            string[,] parameters = clsGetDatabasesInformation.GetColumnSQLInfo(SelectedDatabase, SelectedTable);
+            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(SelectedDatabase, SelectedTable);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_AddNewCode(SelectedTable, parameters);
+            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_AddNewCode(SelectedTable, parameters);*/
         }
 
         private void btnBack_Click(object sender, EventArgs e)
@@ -98,42 +112,42 @@ namespace My_Code_Generator.Forms
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsGetDatabasesInformation.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            /*string tableName = cmbTables.SelectedItem.ToString();
+            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_UpdateCode(tableName, parameters);
+            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_UpdateCode(tableName, parameters);*/
         }
 
         private void btnDeleteCode_Click(object sender, EventArgs e)
         {
-            string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsGetDatabasesInformation.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            /*string tableName = cmbTables.SelectedItem.ToString();
+            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_DeleteCode(tableName, parameters);
+            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_DeleteCode(tableName, parameters);*/
         }
 
         private void btnFindCode_Click(object sender, EventArgs e)
         {
-            string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsGetDatabasesInformation.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            /*string tableName = cmbTables.SelectedItem.ToString();
+            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_FindCode(tableName, parameters);
+            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_FindCode(tableName, parameters);*/
         }
 
         private void btnGenerateAll_Click(object sender, EventArgs e)
         {
-            string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsGetDatabasesInformation.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            /*string tableName = cmbTables.SelectedItem.ToString();
+            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateAll(tableName, parameters);
+            txtGeneratorCode.Text = clsGetSQLCode.GenerateAll(tableName, parameters);*/
         }
 
         private void btnIsExists_Click(object sender, EventArgs e)
         {
-            string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsGetDatabasesInformation.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            /*string tableName = cmbTables.SelectedItem.ToString();
+            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_IsExistsCode(tableName, parameters);
+            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_IsExistsCode(tableName, parameters);*/
         }
 
     }

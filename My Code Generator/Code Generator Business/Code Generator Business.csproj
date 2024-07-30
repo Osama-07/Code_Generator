@@ -48,7 +48,6 @@
   <ItemGroup>
     <Compile Include="clsGeneratorBusiness.cs" />
     <Compile Include="clsGeneratorDataAccess.cs" />
-    <Compile Include="clsGetDatabasesInformation.cs" />
     <Compile Include="clsGetSQLCode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

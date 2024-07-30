@@ -1,9 +1,10 @@
 ﻿using static Code_Generator_Business.clsGeneratorDataAccess;
 using System;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 using Code_Generator_Business;
-using System.Text;
+using Generator_Code_Data;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace My_Code_Generator
 {
@@ -30,69 +31,59 @@ namespace My_Code_Generator
             _frmMainMenue = frmMainMenue;
         }
 
-        private void ShowDBInfo(object sender, DBQueryInfoEventArgs e)
-        {
-            StringBuilder properties = new StringBuilder();
-
-            for (int i = 0; i < e.Properties.Length; i++)
-            {
-                if (i == e.Properties.Length - 1)
-                {
-                    properties.Append(e.Properties[i]);
-                    break;
-                }
-
-                properties.Append(e.Properties[i] + ", ");
-            }
-
-            MessageBox.Show($"Database Name is \"{e.SelectedDatabase}\", Table Name is \"{e.SelectedTable}\"\n Properties : \n {properties}.",
-                            "Succeeded", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        public List<DatabaseSchema> databaseSchemas { get; set; }
 
         private void _GetDatabases()
         {
-            string[] databasesName = clsGetDatabasesInformation.GetDatabases();
-
-            for(int i = 0; i < databasesName.Length; i++)
+            foreach (var database in databaseSchemas.OrderBy(d => d.DatabaseName))
             {
-                cmbDatabases.Items.Add(databasesName[i]);
+                cmbDatabases.Items.Add(database.DatabaseName);   
             }
 
-            cmbDatabases.SelectedIndex = 0;
+            if (cmbDatabases.Items.Count > 0)
+                cmbDatabases.SelectedIndex = 0;
         }
 
         private void _GetTables(string SelectedDatabase)
         {
-            string[] tablesName = clsGetDatabasesInformation.GetTables(SelectedDatabase);
+            var database = databaseSchemas.Find(d => d.DatabaseName == SelectedDatabase);
 
-            for (int i = 0; i < tablesName.Length; i++)
+            if (database != null)
             {
-                cmbTables.Items.Add(tablesName[i]);
+                foreach (var table in database.Tables.OrderBy(t => t.TableName))
+                {
+                    cmbTables.Items.Add(table.TableName);
+                }
             }
-
+            
             cmbTables.SelectedIndex = 0;
         }
 
         private void _GetColumns(string selectedDatabase, string tableName)
         {
-            //clsGetDatabasesInformation.OnEndQuery += ShowDBInfo;
+            var database = databaseSchemas.Find(d => d.DatabaseName == selectedDatabase);
 
-            string[,] Columns = clsGetDatabasesInformation.GetColumns(selectedDatabase, tableName);
-
-            for (int i = 0; i < Columns.GetLength(0); i++)
+            if (database != null)
             {
-                if (Columns[i, 1] == null)
-                    break;
+                var tables = database.Tables.Find(t => t.TableName == tableName);
 
-                cmbColumns.Items.Add(Columns[i, 1]);
+                if (tables != null)
+                {
+                    foreach (var column in tables.Columns)
+                    {
+                        cmbColumns.Items.Add(column.ColumnName);
+                    }
+                }
             }
-
+            
             cmbColumns.SelectedIndex = 0;
         }
 
         private void frmDataAccessLayer_Shown(object sender, EventArgs e)
         {
-            Parallel.Invoke(_GetDatabases);
+            databaseSchemas = clsDatabaseInfoData.GetAllDatabaseSchemas();
+
+            _GetDatabases();
         }
 
         private void cmbDatabases_SelectedIndexChanged(object sender, EventArgs e)
@@ -115,17 +106,8 @@ namespace My_Code_Generator
 
         private void btnGenerateData_Click(object sender, EventArgs e)
         {
-            // Business Logic.
-            /*string[,] Columns = clsGetDatabasesInformation.GetColumns(cmbDatabases.Text, cmbTables.Text);
-
             txtGeneratorCode.Clear();
-            txtGeneratorCode.Text = clsGeneratorBusiness.GeneratorBusinessCode(cmbTables.Text, Columns);*/
-
-            // Data Access.
-            string[,] Columns = clsGetDatabasesInformation.GetColumns(cmbDatabases.Text, cmbTables.Text);
-
-            txtGeneratorCode.Clear();
-            txtGeneratorCode.Text = GetAllCode(cmbTables.Text, Columns);
+            //txtGeneratorCode.Text = GetAllCode(cmbTables.Text, Columns);
         }
 
     }

@@ -43,3 +43,28 @@ C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\My_Code_Generator\obj\
 C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\My_Code_Generator\obj\Debug\My_Code_.0D9DFC01.Up2Date
 C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.exe
 C:\Users\TOSHIBA\Desktop\Osama Projects\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.pdb
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\My_Code_Generator.exe.config
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\My_Code_Generator.exe
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\My_Code_Generator.pdb
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Code Generator Business.dll
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Generator Code Data.dll
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Util.dll
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Code Generator Business.pdb
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Generator Code Data.pdb
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Util.pdb
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Util.dll.config
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.csproj.AssemblyReference.cache
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Forms.frmBusinessAccessLayer.resources
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.frmDataAccessLayer.resources
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Sql_Forms.frmMainSqlScreen.resources
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Forms.frmSQLServer.resources
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.frmMainMenue.resources
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Properties.Resources.resources
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.csproj.GenerateResource.cache
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.csproj.CoreCompileInputs.cache
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_.0D9DFC01.Up2Date
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.exe
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.pdb
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Newtonsoft.Json.dll
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\Newtonsoft.Json.xml
+D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\bin\Debug\appsettings.json

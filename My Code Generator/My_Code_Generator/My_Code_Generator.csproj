@@ -35,9 +35,8 @@
   <PropertyGroup>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="Guna.UI2">
       <HintPath>..\..\Osama Projects\Guna_UI_Framework_Ultimate_v2.0.0.1\Guna.UI-Framework-Lib-master\Guna.UI2 WinForms\.net 4.0\Guna.UI2.dll</HintPath>
@@ -132,6 +131,10 @@
     <ProjectReference Include="..\Code Generator Business\Code Generator Business.csproj">
       <Project>{ecdc6b39-316a-4a1f-86dc-fbcfd3b2975b}</Project>
       <Name>Code Generator Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Generator Code Data\Generator Code Data.csproj">
+      <Project>{9ce82350-0412-42a9-991c-3ea562ee0ce0}</Project>
+      <Name>Generator Code Data</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
