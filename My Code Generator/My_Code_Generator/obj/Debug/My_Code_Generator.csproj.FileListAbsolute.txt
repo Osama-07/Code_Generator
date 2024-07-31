@@ -56,7 +56,6 @@ D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_G
 D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.csproj.AssemblyReference.cache
 D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Forms.frmBusinessAccessLayer.resources
 D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.frmDataAccessLayer.resources
-D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Sql_Forms.frmMainSqlScreen.resources
 D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Forms.frmSQLServer.resources
 D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.frmMainMenue.resources
 D:\سطح المكتب\Osama Projects\Code_Generator\My Code Generator\My_Code_Generator\obj\Debug\My_Code_Generator.Properties.Resources.resources

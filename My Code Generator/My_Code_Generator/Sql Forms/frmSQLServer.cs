@@ -1,23 +1,20 @@
-﻿using Code_Generator_Business;
-using Generator_Code_Data;
-using My_Code_Generator.Sql_Forms;
+﻿using Generator_Code_Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace My_Code_Generator.Forms
 {
     public partial class frmSQLServer : Form
     {
-        private frmMainSqlScreen _frmMainSqlScreen;
+        private frmMainMenue _frmMainMenue;
 
-        public frmSQLServer(frmMainSqlScreen frmMainSqlScreen)
+        public frmSQLServer(frmMainMenue frmMain)
         {
             InitializeComponent();
 
-            _frmMainSqlScreen = frmMainSqlScreen;
+            _frmMainMenue = frmMain;
         }
 
         public List<DatabaseSchema> databaseSchemas { get; set; }
@@ -101,13 +98,6 @@ namespace My_Code_Generator.Forms
             string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(SelectedDatabase, SelectedTable);
 
             txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_AddNewCode(SelectedTable, parameters);*/
-        }
-
-        private void btnBack_Click(object sender, EventArgs e)
-        {
-            _frmMainSqlScreen.Show();
-
-            this.Close();
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)

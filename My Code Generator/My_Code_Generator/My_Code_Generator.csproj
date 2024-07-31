@@ -69,12 +69,6 @@
     <Compile Include="Data Access Forms\frmDataAccessLayer.Designer.cs">
       <DependentUpon>frmDataAccessLayer.cs</DependentUpon>
     </Compile>
-    <Compile Include="Sql Forms\frmMainSqlScreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Sql Forms\frmMainSqlScreen.Designer.cs">
-      <DependentUpon>frmMainSqlScreen.cs</DependentUpon>
-    </Compile>
     <Compile Include="Sql Forms\frmSQLServer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -94,9 +88,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Data Access Forms\frmDataAccessLayer.resx">
       <DependentUpon>frmDataAccessLayer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Sql Forms\frmMainSqlScreen.resx">
-      <DependentUpon>frmMainSqlScreen.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Sql Forms\frmSQLServer.resx">
       <DependentUpon>frmSQLServer.cs</DependentUpon>

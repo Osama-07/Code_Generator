@@ -3,7 +3,6 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-using My_Code_Generator.Sql_Forms;
 
 namespace My_Code_Generator
 {
@@ -13,7 +12,7 @@ namespace My_Code_Generator
 
         private frmDataAccessLayer _frmDataAccessLayer;
         private frmBusinessAccessLayer _frmBusinessAccess;
-        private frmMainSqlScreen _frmMainSql;
+        private frmSQLServer _frmSQLServer;
 
         private Form activeForm;
         public Form activeSubForm;
@@ -150,13 +149,13 @@ namespace My_Code_Generator
 
         private void btnSqlServer_Click(object sender, EventArgs e)
         {
-            if (_frmMainSql != null)
-                OpenChildForm(_frmMainSql, enThameMode.SqlServer);
+            if (_frmSQLServer != null)
+                OpenChildForm(_frmSQLServer, enThameMode.SqlServer);
             else
             {
-                _frmMainSql = new frmMainSqlScreen(this);
+                _frmSQLServer = new frmSQLServer(this);
                 
-                OpenChildForm(_frmMainSql, enThameMode.SqlServer);
+                OpenChildForm(_frmSQLServer, enThameMode.SqlServer);
             }
         }
 
