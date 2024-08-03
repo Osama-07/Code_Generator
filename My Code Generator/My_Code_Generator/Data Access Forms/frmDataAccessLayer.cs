@@ -1,5 +1,4 @@
-﻿using static Code_Generator_Business.clsGeneratorDataAccess;
-using System;
+﻿using System;
 using System.Windows.Forms;
 using Code_Generator_Business;
 using Generator_Code_Data;
@@ -106,8 +105,11 @@ namespace My_Code_Generator
 
         private void btnGenerateData_Click(object sender, EventArgs e)
         {
+            var database = databaseSchemas.Find(d => d.DatabaseName == cmbDatabases.Text); // get database name.
+            var table = database.Tables.Find(t => t.TableName == cmbTables.Text);
+
             txtGeneratorCode.Clear();
-            //txtGeneratorCode.Text = GetAllCode(cmbTables.Text, Columns);
+            txtGeneratorCode.Text = clsGeneratorDataAccess.GetAllCode(table);
         }
 
     }

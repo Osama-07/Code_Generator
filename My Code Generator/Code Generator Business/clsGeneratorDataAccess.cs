@@ -1,4 +1,5 @@
-﻿
+﻿using Generator_Code_Data;
+using System.Linq;
 using System.Text;
 
 
@@ -6,286 +7,930 @@ namespace Code_Generator_Business
 {
     public class clsGeneratorDataAccess
     {
-
-        public static string AddNew(string TableName, string[,] Parameters)
+        private static string _GetSqlDataReaderMethod(string dataType)
         {
-            StringBuilder code = new StringBuilder();
-
-            // Generate Add Record (INSERT) Code
-            if (TableName == "People")
-				code.Append($"public static Nullable<int> AddNewPerson(string StoredProcedure, SqlParameter[] parameters)");
-			else
-				code.Append($"public static Nullable<int> AddNew{TableName.Remove(TableName.Length - 1)}(string StoredProcedure, SqlParameter[] parameters)");
-
-            code.AppendLine("{");
-            code.AppendLine($"     Nullable<int> {Parameters[0, 1]} = null;");
-            code.AppendLine();
-            code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
-            code.AppendLine("    using (SqlCommand Command = new SqlCommand(StoredProcedure, Connection))");
-            code.AppendLine("    {");
-            code.AppendLine("       Command.CommandType = CommandType.StoredProcedure;");
-            code.AppendLine();
-            code.AppendLine("       Command.Parameters.AddRange(parameters);");
-            code.AppendLine();
-            code.AppendLine("       // Output parameter");
-            code.AppendLine($"       SqlParameter outputParameter = new SqlParameter($\"@New{Parameters[0, 1]}\", SqlDbType.Int)");
-            code.AppendLine("       {");
-            code.AppendLine("           Direction = ParameterDirection.Output");
-            code.AppendLine("       };");
-            code.AppendLine("       Command.Parameters.Add(outputParameter);");
-            code.AppendLine();
-            code.AppendLine("       try");
-            code.AppendLine("       {");
-            code.AppendLine("           Connection.Open();");
-            code.AppendLine();
-            code.AppendLine("           Command.ExecuteScalar();");
-            code.AppendLine();
-            code.AppendLine($"           {Parameters[0, 1]} = (int)Command.Parameters[$\"@New{Parameters[0, 1]}\"].Value;");
-            code.AppendLine();
-            code.AppendLine("       }");
-            code.AppendLine("       catch (SqlException ex)");
-            code.AppendLine("       {");
-            code.AppendLine("           // Sql Exception.");
-            code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-            code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-            code.AppendLine("       }");
-            code.AppendLine("       catch(Exception ex)");
-            code.AppendLine("       {");
-            code.AppendLine("          clsUtil.StoreEventInEventLogs(SourceName, $\"Error AddNew {StoredProcedure}: \" + ex.Message, clsUtil.enEventType.Error);");
-            code.AppendLine("          MessageBox.Show(\"Error AddNew {StoredProcedure}: \" + ex.Message, \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-            code.AppendLine("       }");
-            code.AppendLine("}");
-            code.AppendLine();
-            code.AppendLine($"    return {Parameters[0, 1]};");
-            code.AppendLine("}");
-
-            code.AppendLine();
-
-            return code.ToString();
+            switch (dataType.ToLower())
+            {
+                case "bool":
+                case "boolean":
+                    return "GetBoolean";
+                case "byte":
+                    return "GetByte";
+                case "short":
+                case "int16":
+                    return "GetInt16";
+                case "int":
+                case "int32":
+                    return "GetInt32";
+                case "long":
+                case "int64":
+                    return "GetInt64";
+                case "decimal":
+                    return "GetDecimal";
+                case "double":
+                    return "GetDouble";
+                case "float":
+                    return "GetFloat";
+                case "datetime":
+                case "smalldatetime":
+                case "date":
+                    return "GetDateTime";
+                case "string":
+                case "char":
+                case "nchar":
+                case "varchar":
+                case "nvarchar":
+                case "text":
+                case "ntext":
+                    return "GetString";
+                case "byte[]":
+                case "binary":
+                case "varbinary":
+                case "image":
+                    return "GetBytes";
+                default:
+                    return "GetValue"; // Fallback to the general GetValue method
+            }
         }
 
-        public static string Find(string TableName)
+
+        public static string DTO(TableInfo tableInfo)
         {
-            StringBuilder code = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
-			// Generate Update Record (UPDATE) Code
-			if (TableName == "People")
-				code.AppendLine($"public static bool FindPerson(string StoredProcedure, ref SqlParameter[] parameters)");
-			else
-				code.AppendLine($"public static bool Find{TableName.Remove(TableName.Length - 1)}(string StoredProcedure, ref SqlParameter[] parameters)");
-            
-            code.AppendLine("{");
-            code.AppendLine("    bool Found = false;");
-            code.AppendLine();
-            code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
-            code.AppendLine("    using (SqlCommand Command = new SqlCommand(StoredProcedure, Connection))");
-            code.AppendLine("    {");
-			code.AppendLine("       Command.CommandType = CommandType.StoredProcedure;");
-			code.AppendLine();
-            code.AppendLine("       Command.Parameters.AddWithValue($\"@{parameters[0].ParameterName}\", parameters[0].Value);");
-            code.AppendLine("");
-			code.AppendLine("       try");
-			code.AppendLine("       {");
-			code.AppendLine("           Connection.Open();");
-			code.AppendLine();
-			code.AppendLine("           using (SqlDataReader reader = Command.ExecuteReader())");
-            code.AppendLine("           {");
-            code.AppendLine("               if (reader.Read())");
-            code.AppendLine("               {");
-            code.AppendLine("                   for (int i = 0; i < reader.FieldCount; i++)");
-            code.AppendLine("                   {");
-            code.AppendLine("                       parameters[i].Value = reader[parameters[i].ParameterName];");
-            code.AppendLine("                   }");
-            code.AppendLine();
-            code.AppendLine("                   Found = true;");
-            code.AppendLine("               }");
-            code.AppendLine("           }");
-            code.AppendLine("       }");
-			code.AppendLine("       catch (SqlException ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           // Sql Exception.");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("       catch(Exception ex)");
-            code.AppendLine("       {");
-            code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-            code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-            code.AppendLine("       }");
-            code.AppendLine("    }");
-            code.AppendLine("");
-            code.AppendLine("    return Found;");
-            code.AppendLine("}");
+            sb.AppendLine($"public class {tableInfo.TableName}DTO");
+            sb.AppendLine("{");
+            sb.Append($"    public {tableInfo.TableName}DTO(");
+            // Constructor.
+            foreach (var column in tableInfo.Columns)
+            {
+                sb.Append($"{column.DataType}");
+                // if Nullable add '?'.
+                if (column.IsNullable)
+                    sb.Append("? ");
+                else
+                    sb.Append(' '); // space
 
-            code.AppendLine();
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append($"{column.ColumnName.ToLower()}, ");
+                else
+                    sb.AppendLine($"{column.ColumnName.ToLower()})");
+            }
+            sb.AppendLine("{");
+            // inside Constructor.
+            foreach (var column in tableInfo.Columns)
+            {
+                sb.AppendLine($"    this.{column.ColumnName} = {column.ColumnName.ToLower()};");
+            }
+            sb.AppendLine("}");
+            sb.AppendLine("");
+            // Properties.
+            foreach (var column in tableInfo.Columns)
+            {
+                // first column. (ID).
+                if (column.NumberOfColumn == 1)
+                {
+                    sb.AppendLine($"[Range(0, int.MaxValue, ErrorMessage = \"{column.ColumnName} must be between 0 and the maximum value of an integer.\")]");
+                }
 
-            return code.ToString();
+                // attr [Required].
+                if (!column.IsNullable)
+                {
+                    sb.AppendLine($"[Required(ErrorMessage = \"{column.ColumnName} is required.\")]");
+                }
+
+                // attr [MaxLength].
+                if (column.DataType == "string")
+                {
+                    sb.AppendLine($"[MaxLength({column.MaxCharacters}, ErrorMessage = \"{column.ColumnName} cannot exceed {column.MaxCharacters} characters.\")]");
+                }
+
+                sb.Append($"public {column.DataType}");
+                // if Nullable add '?'.
+                if (column.IsNullable)
+                    sb.Append("? ");
+                else
+                    sb.Append(' '); // space.
+
+                sb.Append($"{column.ColumnName} {{ get; set; }} ");
+
+                if (column.IsNullable)
+                    sb.Append("// allow null. ");
+
+                if (column.DataType == "string")
+                    sb.AppendLine($"// Length: {column.MaxCharacters}");
+                
+                sb.AppendLine("}");
+            }
+
+            return sb.ToString();
         }
 
-        public static string Update(string TableName, string[,] Parameters)
+        public static string AddNew(TableInfo tableInfo)
         {
-            StringBuilder code = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
-			// Generate Update Record (UPDATE) Code
-			if (TableName == "People")
-				code.Append($"public static bool UpdatePerson(string StoredProcedure, SqlParameter[] parameters)");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static int? AddNewPerson(PeopleDTO newPerson)");
+            else    
+                sb.AppendLine($"public static int? AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}({tableInfo.TableName}DTO new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)})");
+
+            sb.AppendLine("{");
+            sb.AppendLine("");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine($"    int? newID = null;");
+            sb.AppendLine("");
+            sb.AppendLine("     using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_AddNewPerson\", conn))");
+            else    
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}\", conn))");
+            sb.AppendLine("     {");
+            sb.AppendLine("");
+            sb.AppendLine("     cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine("");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.NumberOfColumn == 1)
+                    continue; // becuase in AddNew No parameter for ID.
+
+                if (column.IsNullable)
+                {
+                    sb.AppendLine($"    if (string.IsNullOrEmpty(new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName})) // allow null");
+                    sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", DBNull.Value);");
+                    sb.AppendLine("     else");
+                    sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+                }
+                else
+                    sb.AppendLine($"    cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+            }
+            sb.AppendLine("");
+            sb.AppendLine("     // output parameter.");
+            sb.AppendLine($"    SqlParameter outputParameter = new SqlParameter(\"@New{tableInfo.Columns.First().ColumnName}\", SqlDbType.Int)");
+            sb.AppendLine("     {");
+            sb.AppendLine("         Direction = ParameterDirection.Output");
+            sb.AppendLine("     };");
+            sb.AppendLine("     cmd.Parameters.Add(outputParameter);");
+            sb.AppendLine("");
+            sb.AppendLine("     try");
+            sb.AppendLine("     {");
+            sb.AppendLine("         conn.Open();");
+            sb.AppendLine("");
+            sb.AppendLine("         cmd.ExecuteNonQuery();");
+            sb.AppendLine("");
+            sb.AppendLine($"         newID = (int?)cmd.Parameters[\"@New{tableInfo.Columns.First().ColumnName}\"].Value;");
+            sb.AppendLine("     }");
+            sb.AppendLine("     catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("     {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNewPerson: {ex.Message}\", clsUtil.enEventType.Error);");
             else
-				code.Append($"public static bool Update{TableName.Remove(TableName.Length - 1)}(string StoredProcedure, SqlParameter[] parameters)");
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("     }");
+            sb.AppendLine("   }");
+            sb.AppendLine("");
+            sb.AppendLine("   return newID;");
+            sb.AppendLine("}");
 
-			code.AppendLine("{");
-            code.AppendLine("    bool Updated = false;");
-            code.AppendLine();
-            code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
-            code.AppendLine("    using (SqlCommand Command = new SqlCommand(StoredProcedure, Connection))");
-            code.AppendLine("    {");
-			code.AppendLine("       Command.CommandType = CommandType.StoredProcedure;");
-			code.AppendLine("");
-			code.AppendLine("       Command.Parameters.AddRange(parameters);");
-			code.AppendLine("");
-            code.AppendLine("       try");
-            code.AppendLine("       {");
-            code.AppendLine("           Connection.Open();");
-            code.AppendLine("");
-            code.AppendLine("           int rowAfficted = Command.ExecuteNonQuery();");
-            code.AppendLine("");
-            code.AppendLine("           Updated = (rowAfficted > 0);");
-            code.AppendLine("       }");
-			code.AppendLine("       catch (SqlException ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           // Sql Exception.");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("       catch(Exception ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("");
-            code.AppendLine("    }");
-            code.AppendLine("");
-            code.AppendLine("    return Updated;");
-            code.AppendLine("}");
 
-            code.AppendLine();
-
-            return code.ToString();
+            return sb.ToString();
         }
-
-        public static string IsExists(string TableName)
+        
+        public static string AddNewAsync(TableInfo tableInfo)
         {
-            StringBuilder code = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
-			// Generate Is Exist Record (SELECT COUNT) Code
-			if (TableName == "People")
-				code.AppendLine($"public static bool IsPersonExists(string StoredProcedure, SqlParameter parameter)");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static async Task<int?> AddNewPersonAsync(PeopleDTO newPerson)");
+            else    
+                sb.AppendLine($"public static async Task<int?> AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async({tableInfo.TableName}DTO new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)})");
+
+            sb.AppendLine("{");
+            sb.AppendLine("");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine($"    int? newID = null;");
+            sb.AppendLine("");
+            sb.AppendLine("     using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_AddNewPerson\", conn))");
+            else    
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}\", conn))");
+            sb.AppendLine("     {");
+            sb.AppendLine("");
+            sb.AppendLine("     cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine("");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                {
+                    sb.AppendLine($"    if (string.IsNullOrEmpty(new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName})) // allow null");
+                    sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", DBNull.Value);");
+                    sb.AppendLine("     else");
+                    sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+                }
+                else
+                    sb.AppendLine($"    cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", new{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+            }
+            sb.AppendLine("");
+            sb.AppendLine("     // output parameter.");
+            sb.AppendLine($"    SqlParameter outputParameter = new SqlParameter(\"@New{tableInfo.Columns.First().ColumnName}\", SqlDbType.Int)");
+            sb.AppendLine("     {");
+            sb.AppendLine("         Direction = ParameterDirection.Output");
+            sb.AppendLine("     };");
+            sb.AppendLine("     cmd.Parameters.Add(outputParameter);");
+            sb.AppendLine("");
+            sb.AppendLine("     try");
+            sb.AppendLine("     {");
+            sb.AppendLine("         await conn.OpenAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("         await cmd.ExecuteNonQueryAsync();");
+            sb.AppendLine("");
+            sb.AppendLine($"         newID = (int?)cmd.Parameters[\"@New{tableInfo.Columns.First().ColumnName}\"].Value;");
+            sb.AppendLine("     }");
+            sb.AppendLine("     catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("     {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNewPerson: {ex.Message}\", clsUtil.enEventType.Error);");
             else
-				code.AppendLine($"public static bool Is{TableName.Remove(TableName.Length - 1)}Exists(string StoredProcedure, SqlParameter parameter)");
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("     }");
+            sb.AppendLine("   }");
+            sb.AppendLine("");
+            sb.AppendLine("   return newID;");
+            sb.AppendLine("}");
 
-			code.AppendLine("{");
-            code.AppendLine("    bool Exists = false;");
-            code.AppendLine("");
-            code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
-            code.AppendLine("    using (SqlCommand Command = new SqlCommand(StoredProcedure, Connection))");
-            code.AppendLine("    {");
-			code.AppendLine("       Command.CommandType = CommandType.StoredProcedure;");
-			code.AppendLine();
-            code.AppendLine("       Command.Parameters.AddWithValue(parameter.ParameterName, parameter.Value);");
-            code.AppendLine();
-            code.AppendLine("       SqlParameter returnValue = new SqlParameter");
-            code.AppendLine("       {");
-            code.AppendLine("           Direction = ParameterDirection.ReturnValue");
-            code.AppendLine("       };");
-            code.AppendLine("       Command.Parameters.Add(returnValue);");
-            code.AppendLine();
-            code.AppendLine("       try");
-            code.AppendLine("       {");
-            code.AppendLine("           Connection.Open();");
-            code.AppendLine("");
-            code.AppendLine("           Command.ExecuteScalar();");
-            code.AppendLine("           int result = (int)returnValue.Value;");
-            code.AppendLine("");
-            code.AppendLine("           Exists = (result == 1);");
-            code.AppendLine("       }");
-			code.AppendLine("       catch (SqlException ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           // Sql Exception.");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("       catch(Exception ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("    }");
-            code.AppendLine("");
-            code.AppendLine("    return Exists;");
-            code.AppendLine("}");
 
-            code.AppendLine();
-
-            return code.ToString();
+            return sb.ToString();
         }
 
-        public static string Delete(string TableName)
+        public static string Get(TableInfo tableInfo)
         {
-            StringBuilder code = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
-			// Generate Delete Record (DELETE) Code
-			if (TableName == "People")
-				code.AppendLine($"public static bool DeletePerson(string StoredProcedure, SqlParameter parameter)");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static PeopleDTO? GetPersonByID(int? id)");
             else
-				code.AppendLine($"public static bool Delete{TableName.Remove(TableName.Length - 1)}(string StoredProcedure, SqlParameter parameter)");
+                sb.AppendLine($"public static {tableInfo.TableName}DTO? Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID(int? id)");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (id < 0) return null; // check PersonID maybe data is not correct.");
+            sb.AppendLine("");
+            sb.AppendLine("    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("    {");
+            sb.AppendLine("        clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("        throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("     using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_GetPersonByID\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID\", conn))");
+            sb.AppendLine("     {");
+            sb.AppendLine("");
+            sb.AppendLine("         cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine("");
+            sb.AppendLine($"         cmd.Parameters.AddWithValue(\"@{tableInfo.Columns.First().ColumnName}\", id); // {tableInfo.Columns.First().ColumnName} parameter.");
+            sb.AppendLine("");
+            sb.AppendLine("     try");
+            sb.AppendLine("     {");
+            sb.AppendLine("         conn.Open();");
+            sb.AppendLine("");
+            sb.AppendLine("         using (SqlDataReader reader = cmd.ExecuteReader())");
+            sb.AppendLine("         {");
+            sb.AppendLine("");
+            sb.AppendLine("             if (reader.Read())");
+            sb.AppendLine("             {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"       return new PeopleDTO");
+            else
+                sb.AppendLine($"       return new {tableInfo.TableName}DTO");
+            sb.AppendLine("       (");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                    sb.Append($"           reader.IsDBNull(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                else
+                    sb.Append($"           reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
 
-			code.AppendLine("{");
-            code.AppendLine("    bool Deleted = false;");
-            code.AppendLine("");
-            code.AppendLine("    using (SqlConnection Connection = new SqlConnection(clsSettingsDataAccess.ConnectionString))");
-            code.AppendLine("    using (SqlCommand Command = new SqlCommand(StoredProcedure, Connection))");
-            code.AppendLine("    {");
-			code.AppendLine("       Command.CommandType = CommandType.StoredProcedure;");
-			code.AppendLine();
-			code.AppendLine("       Command.Parameters.AddWithValue(parameter.ParameterName, parameter.Value);"); code.AppendLine("");
-			code.AppendLine();
-            code.AppendLine("       try");
-            code.AppendLine("       {");
-            code.AppendLine("           Connection.Open();");
-            code.AppendLine("");
-            code.AppendLine("           int rowAfficted = Command.ExecuteNonQuery();");
-            code.AppendLine("");
-            code.AppendLine("           Deleted = (rowAfficted > 0);");
-            code.AppendLine("       }");
-			code.AppendLine("       catch (SqlException ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           // Sql Exception.");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("       catch(Exception ex)");
-			code.AppendLine("       {");
-			code.AppendLine("           clsUtil.StoreEventInEventLogs(SourceName, $\"Error {StoredProcedure}: {ex.Message}\", clsUtil.enEventType.Error);");
-			code.AppendLine("           MessageBox.Show($\"Error {StoredProcedure}: {ex.Message}\", \"Error\", MessageBoxButtons.OK, MessageBoxIcon.Error);");
-			code.AppendLine("       }");
-			code.AppendLine("    }");
-            code.AppendLine("");
-            code.AppendLine("    return Deleted;");
-            code.AppendLine("}");
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append(',');
 
-            code.AppendLine();
+                sb.AppendLine("");
+            }
+            sb.AppendLine("       );");
+            sb.AppendLine("             }"); // close if .
+            sb.AppendLine("             else");
+            sb.AppendLine("                 return null;");
+            sb.AppendLine("         }"); // close reader
+            sb.AppendLine("     }"); // close try
+            sb.AppendLine("     catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("     {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNewPerson: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("     }"); // close catch
+            sb.AppendLine(" }"); // close cmd
+            sb.AppendLine("");
+            sb.AppendLine("     return null;");
+            sb.AppendLine("}"); // close function
 
-            return code.ToString();
+            return sb.ToString();
         }
 
-        public static string GetAllCode(string TableName, string[,] Parameters)
+        public static string GetAsync(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static async Task<PeopleDTO?> GetPersonByIDAsync(int? id)");
+            else
+                sb.AppendLine($"public static {tableInfo.TableName}DTO? Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(int? id)");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (id < 0) return null; // check {tableInfo.Columns.First().ColumnName} maybe data is not correct.");
+            sb.AppendLine("");
+            sb.AppendLine("    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("    {");
+            sb.AppendLine("        clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("        throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("     using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_GetPersonByID\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID\", conn))");
+            sb.AppendLine("     {");
+            sb.AppendLine("");
+            sb.AppendLine("         cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine("");
+            sb.AppendLine($"         cmd.Parameters.AddWithValue(\"@{tableInfo.Columns.First().ColumnName}\", id); // {tableInfo.Columns.First().ColumnName} parameter.");
+            sb.AppendLine("");
+            sb.AppendLine("     try");
+            sb.AppendLine("     {");
+            sb.AppendLine("         await conn.OpenAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("         using (SqlDataReader reader = await cmd.ExecuteReaderAsync())");
+            sb.AppendLine("         {");
+            sb.AppendLine("");
+            sb.AppendLine("             if (reader.Read())");
+            sb.AppendLine("             {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"       return new PeopleDTO");
+            else
+                sb.AppendLine($"       return new {tableInfo.TableName}DTO");
+            sb.AppendLine("       (");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                    sb.Append($"           await reader.IsDBNullAsync(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                else
+                    sb.Append($"           reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append(',');
+
+                sb.AppendLine("");
+            }
+            sb.AppendLine("       );");
+            sb.AppendLine("             }"); // close if .
+            sb.AppendLine("             else");
+            sb.AppendLine("                 return null;");
+            sb.AppendLine("         }"); // close reader
+            sb.AppendLine("     }"); // close try
+            sb.AppendLine("     catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("     {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNewPerson: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("     }"); // close catch
+            sb.AppendLine(" }"); // close cmd
+            sb.AppendLine("");
+            sb.AppendLine("     return null;");
+            sb.AppendLine("}"); // close function
+
+            return sb.ToString();
+        }
+
+        public static string Update(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static bool UpdatePerson(PeopleDTO uPerson)");
+            else
+                sb.AppendLine($"public static bool Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}({tableInfo.TableName}DTO u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)})");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("    bool IsUpdated = false;");
+            sb.AppendLine();
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_UpdatePerson\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}\", conn))");
+            sb.AppendLine("    {");
+			sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+			sb.AppendLine("");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                {
+                    // if column nullable.
+                    if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                    {
+                        sb.AppendLine($"    if (string.IsNullOrEmpty(uPerson.{column.ColumnName})) // allow null");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", DBNull.Value);");
+                        sb.AppendLine("     else");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", uPerson.{column.ColumnName});");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"    if (string.IsNullOrEmpty(u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName})) // allow null");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", DBNull.Value);");
+                        sb.AppendLine("     else");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+                    }
+                }
+                else
+                {
+                    // if column is not null.
+                    if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                        sb.AppendLine($"    cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", uPerson.{column.ColumnName});");
+                    else
+                        sb.AppendLine($"    cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+                }
+            }
+            sb.AppendLine("");
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           conn.Open();");
+            sb.AppendLine("");
+            sb.AppendLine("           IsUpdated = cmd.ExecuteNonQuery() > 0;");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_UpdatePerson: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("    return IsUpdated;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+        
+        public static string UpdateAsync(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static async Task<bool> UpdatePersonAsync(PeopleDTO uPerson)");
+            else
+                sb.AppendLine($"public static async Task<bool> Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async({tableInfo.TableName}DTO u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)})");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("    bool IsUpdated = false;");
+            sb.AppendLine();
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_UpdatePerson\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}\", conn))");
+            sb.AppendLine("    {");
+			sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+			sb.AppendLine("");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                {
+                    // if column nullable.
+                    if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                    {
+                        sb.AppendLine($"    if (string.IsNullOrEmpty(uPerson.{column.ColumnName})) // allow null");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", DBNull.Value);");
+                        sb.AppendLine("     else");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", uPerson.{column.ColumnName});");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"    if (string.IsNullOrEmpty(u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName})) // allow null");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", DBNull.Value);");
+                        sb.AppendLine("     else");
+                        sb.AppendLine($"        cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+                    }
+                }
+                else
+                {
+                    // if column is not null.
+                    if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                        sb.AppendLine($"    cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", uPerson.{column.ColumnName});");
+                    else
+                        sb.AppendLine($"    cmd.Parameters.AddWithValue(\"@{column.ColumnName}\", u{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}.{column.ColumnName});");
+                }
+            }
+            sb.AppendLine("");
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           await conn.OpenAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("           IsUpdated = await cmd.ExecuteNonQueryAsync() > 0;");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_UpdatePerson: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("    return IsUpdated;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        public static string IsExists(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static bool IsPersonExistsByID(int? id)");
+            else
+                sb.AppendLine($"public static bool Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByID(int? id)");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine("    bool IsExists = false;");
+            sb.AppendLine("");
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_IsPersonExists\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByID\", conn))");
+            sb.AppendLine("    {");
+			sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+			sb.AppendLine();
+            sb.AppendLine($"       cmd.Parameters.AddWithValue(\"@{tableInfo.Columns.First().ColumnName}\", id);");
+            sb.AppendLine();
+            sb.AppendLine("       SqlParameter returnValue = new SqlParameter");
+            sb.AppendLine("       {");
+            sb.AppendLine("           Direction = ParameterDirection.ReturnValue");
+            sb.AppendLine("       };");
+            sb.AppendLine("       cmd.Parameters.Add(returnValue);");
+            sb.AppendLine();
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           conn.Open();");
+            sb.AppendLine("");
+            sb.AppendLine("           cmd.ExecuteScalar();");
+            sb.AppendLine("");
+            sb.AppendLine("           IsExists = ((int?)returnValue.Value == 1);");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_IsPersonExists: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Exists: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("    return IsExists;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        public static string IsExistsAsync(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static async Task<bool> IsPersonExistsByIDAsync(int? id)");
+            else
+                sb.AppendLine($"public static async Task<bool> Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByIDAsync(int? id)");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine("    bool IsExists = false;");
+            sb.AppendLine("");
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_IsPersonExistsByID\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByID\", conn))");
+            sb.AppendLine("    {");
+            sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine();
+            sb.AppendLine($"       cmd.Parameters.AddWithValue(\"@{tableInfo.Columns.First().ColumnName}\", id);");
+            sb.AppendLine();
+            sb.AppendLine("       SqlParameter returnValue = new SqlParameter");
+            sb.AppendLine("       {");
+            sb.AppendLine("           Direction = ParameterDirection.ReturnValue");
+            sb.AppendLine("       };");
+            sb.AppendLine("       cmd.Parameters.Add(returnValue);");
+            sb.AppendLine();
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           await conn.OpenAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("           await cmd.ExecuteScalarAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("           IsExists = ((int?)returnValue.Value == 1);");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_IsPersonExists: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Exists: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("    return IsExists;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        public static string Delete(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static bool DeletePerson(int? id)");
+            else
+                sb.AppendLine($"public static bool Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}(int? id)");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine("    bool IsDeleted = false;");
+            sb.AppendLine("");
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_DeletePerson\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}\", conn))");
+            sb.AppendLine("    {");
+            sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine();
+            sb.AppendLine($"       cmd.Parameters.AddWithValue(\"@{tableInfo.Columns.First().ColumnName}\", id);");
+            sb.AppendLine();
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           conn.Open();");
+            sb.AppendLine("");
+            sb.AppendLine("           IsDeleted = (cmd.ExecuteNonQuery() > 0);");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_DeletePerson: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("    return IsDeleted;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        public static string DeleteAsync(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"public static async Task<bool> DeletePersonAsync(int? id)");
+            else
+                sb.AppendLine($"public static async Task<bool> Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async(int? id)");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine("    bool IsDeleted = false;");
+            sb.AppendLine("");
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("     using (SqlCommand cmd = new SqlCommand(\"SP_DeletePerson\", conn))");
+            else
+                sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}\", conn))");
+            sb.AppendLine("    {");
+            sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine();
+            sb.AppendLine($"       cmd.Parameters.AddWithValue(\"@{tableInfo.Columns.First().ColumnName}\", id);");
+            sb.AppendLine();
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           await conn.OpenAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("           IsDeleted = (await cmd.ExecuteNonQueryAsync() > 0);");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_DeletePerson: {ex.Message}\", clsUtil.enEventType.Error);");
+            else
+                sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine("    return IsDeleted;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        public static string GetAll(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"public static List<{tableInfo.TableName}DTO?> GetAll{tableInfo.TableName}()");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine($"    var {tableInfo.TableName}List = new List<{tableInfo.TableName}DTO?>();");
+            sb.AppendLine("");
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_GetAll{tableInfo.TableName}\", conn))");
+            sb.AppendLine("    {");
+            sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine();
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           conn.Open();");
+            sb.AppendLine("");
+            sb.AppendLine("           using (SqlDataReader reader = cmd.ExecuteReader())");
+            sb.AppendLine("           {");
+            sb.AppendLine("               while (reader.Read())");
+            sb.AppendLine("               {");
+            sb.AppendLine($"                   {tableInfo.TableName}List.Add(new {tableInfo.TableName}DTO(");
+            sb.AppendLine("                         ");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                    sb.Append($"                        reader.IsDBNull(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                else
+                    sb.Append($"                        reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append(',');
+
+                sb.AppendLine("");
+            }
+            sb.AppendLine("                   ));");
+            sb.AppendLine("               }");
+            sb.AppendLine("           }");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_GetAll{tableInfo.TableName}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine($"    return {tableInfo.TableName}List;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+        
+        public static string GetAllAsync(TableInfo tableInfo)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"public static async Task<List<{tableInfo.TableName}DTO?>> GetAll{tableInfo.TableName}Async()");
+            sb.AppendLine("{");
+            sb.AppendLine($"    if (string.IsNullOrEmpty(ConnectionString))");
+            sb.AppendLine("     {");
+            sb.AppendLine("         clsUtil.StoreEventInEventLogs(SourceName, $\"Connection string is not set.\", clsUtil.enEventType.Error);");
+            sb.AppendLine("         throw new InvalidOperationException(\"ConnectionString or SourceName is not set.\");");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
+            sb.AppendLine($"    var {tableInfo.TableName}List = new List<{tableInfo.TableName}DTO?>();");
+            sb.AppendLine("");
+            sb.AppendLine("    using (SqlConnection conn = new SqlConnection(ConnectionString))");
+            sb.AppendLine($"     using (SqlCommand cmd = new SqlCommand(\"SP_GetAll{tableInfo.TableName}\", conn))");
+            sb.AppendLine("    {");
+            sb.AppendLine("       cmd.CommandType = CommandType.StoredProcedure;");
+            sb.AppendLine();
+            sb.AppendLine("       try");
+            sb.AppendLine("       {");
+            sb.AppendLine("           await conn.OpenAsync();");
+            sb.AppendLine("");
+            sb.AppendLine("           using (SqlDataReader reader = cmd.ExecuteReader())");
+            sb.AppendLine("           {");
+            sb.AppendLine("               while (reader.Read())");
+            sb.AppendLine("               {");
+            sb.AppendLine($"                   {tableInfo.TableName}List.Add(new {tableInfo.TableName}DTO(");
+            foreach (var column in tableInfo.Columns)
+            {
+                if (column.IsNullable)
+                    sb.Append($"                        await reader.IsDBNullAsync(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                else
+                    sb.Append($"                        reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append(',');
+
+                sb.AppendLine("");
+            }
+            sb.AppendLine("                   ));");
+            sb.AppendLine("               }");
+            sb.AppendLine("           }");
+            sb.AppendLine("       }");
+            sb.AppendLine("       catch (Exception ex) when (ex is SqlException || ex is Exception)");
+            sb.AppendLine("       {");
+            sb.AppendLine($"         clsUtil.StoreEventInEventLogs(SourceName, $\"Error SP_GetAll{tableInfo.TableName}: {{ex.Message}}\", clsUtil.enEventType.Error);");
+            sb.AppendLine("       }");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
+            sb.AppendLine($"    return {tableInfo.TableName}List;");
+            sb.AppendLine("}");
+
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+
+
+
+
+        public static string GetAllCode(TableInfo tableInfo)
         {
             StringBuilder Code = new StringBuilder();
 
-            Code.Append(AddNew(TableName, Parameters));
-            Code.Append(Find(TableName));
-            Code.Append(Update(TableName, Parameters));
-            Code.Append(IsExists(TableName));
-            Code.Append(Delete(TableName));
+            Code.AppendLine(DTO(tableInfo));
+            Code.AppendLine(AddNew(tableInfo));
+            Code.AppendLine(AddNewAsync(tableInfo));
+            Code.AppendLine(Get(tableInfo));
+            Code.AppendLine(GetAsync(tableInfo));
+            Code.AppendLine(Update(tableInfo));
+            Code.AppendLine(UpdateAsync(tableInfo));
+            Code.AppendLine(IsExists(tableInfo));
+            Code.AppendLine(IsExistsAsync(tableInfo));
+            Code.AppendLine(Delete(tableInfo));
+            Code.AppendLine(DeleteAsync(tableInfo));
+            Code.AppendLine(GetAll(tableInfo));
+            Code.AppendLine(GetAllAsync(tableInfo));
 
             return Code.ToString();
         }

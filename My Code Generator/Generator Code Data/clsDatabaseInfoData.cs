@@ -25,6 +25,7 @@ namespace Generator_Code_Data
         public string DataType { get; set; }
         public bool IsNullable { get; set; }
         public int? MaxCharacters { get; set; }
+        public byte NumberOfColumn { get; set; }
     }
 
     public class clsDatabaseInfoData
@@ -147,6 +148,8 @@ namespace Generator_Code_Data
                     {
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
+                            byte columnNumber = 0;
+
                             while (reader.Read())
                             {
                                 columns.Add(new ColumnInfo
@@ -154,7 +157,8 @@ namespace Generator_Code_Data
                                     ColumnName = reader["COLUMN_NAME"].ToString(),
                                     DataType = GetDataType(reader["DATA_TYPE"].ToString()),
                                     IsNullable = reader["IS_NULLABLE"].ToString() == "YES",
-                                    MaxCharacters = reader["CHARACTER_MAXIMUM_LENGTH"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CHARACTER_MAXIMUM_LENGTH"]) : null
+                                    MaxCharacters = reader["CHARACTER_MAXIMUM_LENGTH"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CHARACTER_MAXIMUM_LENGTH"]) : null,
+                                    NumberOfColumn = ++columnNumber
                                 });
                             }
                         }

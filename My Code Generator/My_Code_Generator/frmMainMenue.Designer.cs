@@ -75,8 +75,8 @@
             this.btnClose.CustomImages.Parent = this.btnClose;
             this.btnClose.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.btnClose.FillColor = System.Drawing.Color.Transparent;
-            this.btnClose.Font = new System.Drawing.Font("Dubai", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClose.ForeColor = System.Drawing.Color.Black;
+            this.btnClose.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClose.ForeColor = System.Drawing.Color.White;
             this.btnClose.HoverState.Parent = this.btnClose;
             this.btnClose.Location = new System.Drawing.Point(0, 497);
             this.btnClose.Name = "btnClose";
@@ -97,10 +97,10 @@
             this.btnSqlServer.CustomImages.Parent = this.btnSqlServer;
             this.btnSqlServer.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnSqlServer.FillColor = System.Drawing.Color.Transparent;
-            this.btnSqlServer.Font = new System.Drawing.Font("Javanese Text", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSqlServer.ForeColor = System.Drawing.Color.Black;
+            this.btnSqlServer.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSqlServer.ForeColor = System.Drawing.Color.White;
             this.btnSqlServer.HoverState.Parent = this.btnSqlServer;
-            this.btnSqlServer.Location = new System.Drawing.Point(0, 241);
+            this.btnSqlServer.Location = new System.Drawing.Point(0, 410);
             this.btnSqlServer.Name = "btnSqlServer";
             this.btnSqlServer.ShadowDecoration.Parent = this.btnSqlServer;
             this.btnSqlServer.Size = new System.Drawing.Size(185, 65);
@@ -119,10 +119,10 @@
             this.btnBusinessAccess.CustomImages.Parent = this.btnBusinessAccess;
             this.btnBusinessAccess.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnBusinessAccess.FillColor = System.Drawing.Color.Transparent;
-            this.btnBusinessAccess.Font = new System.Drawing.Font("Javanese Text", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBusinessAccess.ForeColor = System.Drawing.Color.Black;
+            this.btnBusinessAccess.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBusinessAccess.ForeColor = System.Drawing.Color.White;
             this.btnBusinessAccess.HoverState.Parent = this.btnBusinessAccess;
-            this.btnBusinessAccess.Location = new System.Drawing.Point(0, 176);
+            this.btnBusinessAccess.Location = new System.Drawing.Point(0, 345);
             this.btnBusinessAccess.Name = "btnBusinessAccess";
             this.btnBusinessAccess.ShadowDecoration.Parent = this.btnBusinessAccess;
             this.btnBusinessAccess.Size = new System.Drawing.Size(185, 65);
@@ -141,10 +141,10 @@
             this.btnDataAccess.CustomImages.Parent = this.btnDataAccess;
             this.btnDataAccess.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnDataAccess.FillColor = System.Drawing.Color.Transparent;
-            this.btnDataAccess.Font = new System.Drawing.Font("Javanese Text", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDataAccess.ForeColor = System.Drawing.Color.Black;
+            this.btnDataAccess.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDataAccess.ForeColor = System.Drawing.Color.White;
             this.btnDataAccess.HoverState.Parent = this.btnDataAccess;
-            this.btnDataAccess.Location = new System.Drawing.Point(0, 111);
+            this.btnDataAccess.Location = new System.Drawing.Point(0, 280);
             this.btnDataAccess.Name = "btnDataAccess";
             this.btnDataAccess.ShadowDecoration.Parent = this.btnDataAccess;
             this.btnDataAccess.Size = new System.Drawing.Size(185, 65);
@@ -156,7 +156,7 @@
             // 
             this.guna2PictureBox1.AutoRoundedCorners = true;
             this.guna2PictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.guna2PictureBox1.BorderRadius = 54;
+            this.guna2PictureBox1.BorderRadius = 91;
             this.guna2PictureBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.guna2PictureBox1.FillColor = System.Drawing.Color.Teal;
             this.guna2PictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox1.Image")));
@@ -166,7 +166,7 @@
             this.guna2PictureBox1.ShadowDecoration.Depth = 10;
             this.guna2PictureBox1.ShadowDecoration.Parent = this.guna2PictureBox1;
             this.guna2PictureBox1.ShadowDecoration.Shadow = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.guna2PictureBox1.Size = new System.Drawing.Size(185, 111);
+            this.guna2PictureBox1.Size = new System.Drawing.Size(185, 280);
             this.guna2PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.guna2PictureBox1.TabIndex = 1;
             this.guna2PictureBox1.TabStop = false;
@@ -246,10 +246,11 @@
             // 
             this.lblTitle.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblTitle.BackColor = System.Drawing.Color.Transparent;
-            this.lblTitle.Font = new System.Drawing.Font("Impact", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTitle.ForeColor = System.Drawing.Color.White;
             this.lblTitle.Location = new System.Drawing.Point(397, 23);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(67, 36);
+            this.lblTitle.Size = new System.Drawing.Size(51, 25);
             this.lblTitle.TabIndex = 4;
             this.lblTitle.Text = "Home";
             // 
