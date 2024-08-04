@@ -98,9 +98,10 @@ namespace My_Code_Generator.Forms
 
         private void btnGenerateBusiness_Click(object sender, EventArgs e)
         {
-            /*string[,] Columns = clsDatabaseInfoData.GetColumns(cmbDatabases.Text, cmbTables.Text);
+            var database = databaseSchemas.Find(d => d.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.Find(t => t.TableName == cmbTables.Text);
 
-            txtGeneratorCode.Text = clsGeneratorBusiness.GeneratorBusinessCode(cmbTables.Text, Columns);*/
+            txtGeneratorCode.Text = clsGeneratorBusiness.GeneratorBusinessCode(table);
         }
     }
 }

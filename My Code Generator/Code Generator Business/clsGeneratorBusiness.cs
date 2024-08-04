@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Generator_Code_Data;
+using System.Linq;
 using System.Text;
 
 namespace Code_Generator_Business
@@ -36,278 +37,308 @@ namespace Code_Generator_Business
             }
         }
 
-        public static string GeneratorBusinessCode(string SelectedTable, string[,] Properties)
+        public static string GeneratorBusinessCode(TableInfo tableInfo)
         {
-            StringBuilder code = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
             // =====================================================================================================================
             // Create Mode.
-            code.AppendLine("    public enum enMode { AddNew = 1, Update = 2}");
-            code.AppendLine("    public enMode Mode;");
-            code.AppendLine();
+            sb.AppendLine("    public enum enMode { AddNew = 1, Update = 2}");
+            sb.AppendLine("    public enMode Mode;");
+            sb.AppendLine();
 
             // =====================================================================================================================
-            // Create Properties.
-            for (int i = 0; i < Properties.GetLength(0); i++)
+            // Create DTO Variable.
+            sb.AppendLine($"public {tableInfo.TableName}DTO {tableInfo.TableName[0].ToString().ToUpper()}DTO");
+            sb.AppendLine("{");
+            sb.AppendLine("     get");
+            sb.AppendLine("     {");
+            sb.AppendLine($"        return new {tableInfo.TableName}DTO");
+            sb.AppendLine("         (");
+            foreach (var column in tableInfo.Columns)
             {
-                string propertyType = Properties[i, 0];
-                string propertyName = Properties[i, 1];
-
-                if (i == 0)
-                {
-                    code.AppendLine($"    public Nullable<{propertyType}> {propertyName} {{ get; set; }}");
-                }
+                if (column.NumberOfColumn != tableInfo.Columns.Count)
+                    sb.AppendLine($"            this.{column.ColumnName},");
                 else
-                    code.AppendLine($"    public {propertyType} {propertyName} {{ get; set; }}");
-
+                    sb.AppendLine($"            this.{column.ColumnName}");
             }
-            code.AppendLine();
+            sb.AppendLine("         );");
+            sb.AppendLine("     }");
+            sb.AppendLine("}");
 
             // =====================================================================================================================
-            // Public Constructor.
-            code.AppendLine($"    public cls{SelectedTable}()");
-            code.AppendLine("    {");
-            for (int i = 0; i < Properties.GetLength(0); i++)
+            // Constructor.
+            sb.AppendLine($"    public cls{tableInfo.TableName}({tableInfo.TableName}DTO {tableInfo.TableName[0].ToString().ToUpper()}DTO, enMode mode = enMode.AddNew)");
+            sb.AppendLine("     {");
+            foreach (var column in tableInfo.Columns)
             {
-                string propertyName = Properties[i, 1];
-                code.AppendLine($"        this.{propertyName} = default({Properties[i, 0]});");
+                sb.AppendLine($"        this.{column.ColumnName} = {tableInfo.TableName[0].ToString().ToUpper()}DTO.{column.ColumnName};");
             }
-            code.AppendLine();
-            code.AppendLine("        this.Mode = enMode.AddNew;");
-            code.AppendLine("    }");
-            code.AppendLine();
+            sb.AppendLine("");
+            sb.AppendLine("        this.Mode = mode;");
+            sb.AppendLine("     }");
+            sb.AppendLine();
 
             // =====================================================================================================================
-            // private Constructor.
-            code.Append($"    private cls{SelectedTable}(");
-            for (int i = 0; i < Properties.GetLength(0); i++)
+            // Properties.
+            foreach (var column in tableInfo.Columns)
             {
-                string propertyType = Properties[i, 0];
-                string propertyName = Properties[i, 1];
-
-                code.Append($"{propertyType} {propertyName.ToLower()}");
-
-                if (i < Properties.GetLength(0) - 1)
+                // first column. (ID).
+                if (column.NumberOfColumn == 1)
                 {
-                    code.Append(", ");
+                    sb.AppendLine($"[Range(0, int.MaxValue, ErrorMessage = \"{column.ColumnName} must be between 0 and the maximum value of an integer.\")]");
                 }
+
+                // attr [Required].
+                if (!column.IsNullable)
+                {
+                    sb.AppendLine($"[Required(ErrorMessage = \"{column.ColumnName} is required.\")]");
+                }
+
+                // attr [MaxLength].
+                if (column.DataType == "string")
+                {
+                    sb.AppendLine($"[MaxLength({column.MaxCharacters}, ErrorMessage = \"{column.ColumnName} cannot exceed {column.MaxCharacters} characters.\")]");
+                }
+
+                sb.Append($"public {column.DataType}");
+                // if Nullable add '?'.
+                if (column.IsNullable)
+                    sb.Append("? ");
                 else
-                {
-                    code.Append(")");
-                }
+                    sb.Append(' '); // space.
+
+                sb.Append($"{column.ColumnName} {{ get; set; }} ");
+
+                if (column.IsNullable)
+                    sb.Append("// allow null. ");
+
+                if (column.DataType == "string")
+                    sb.AppendLine($"// Length: {column.MaxCharacters}");
             }
-            code.AppendLine("    {");
-            for (int i = 0; i < Properties.GetLength(0); i++)
-            {
-                string propertyName = Properties[i, 1];
-                code.AppendLine($"        this.{propertyName} = {propertyName.ToLower()};");
-            }
-            code.AppendLine();
-            code.AppendLine("        this.Mode = enMode.Update;");
-            code.AppendLine("    }");
-            code.AppendLine();
 
             // =====================================================================================================================
-            // AddNew Function.
-            code.AppendLine($"   private bool _AddNew{SelectedTable}()");
-            code.AppendLine("    {");
-            code.AppendLine("       // parameters");
-            code.AppendLine($"       SqlParameter[] parameters = new SqlParameter[{Properties.GetLength(0) - 1}];");
-
-            for(int i = 1; i < Properties.GetLength(0); i++)
-            {
-                string propertyName = Properties[i, 1];
-
-                code.AppendLine($"    parameters[{i - 1}] = new SqlParameter(\"{propertyName}\", this.{propertyName});");
-            }
-
-            // Stored Procedure Name.
-            code.AppendLine("// Stored Procedure Name.");
-            if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-                code.AppendLine($"       string StoredProcedure = \"SP_AddNew{SelectedTable.Remove(SelectedTable.Length - 1)}\";");
+            // Function AddNew & AddNewAsync.
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"private bool _AddNewPerson()");
             else
-                code.AppendLine($"       string StoredProcedure = \"SP_AddNew{SelectedTable}\";");
+                sb.AppendLine($"private bool _AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}()");
+            sb.AppendLine("    {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"this.{tableInfo.Columns.First().ColumnName} = clsPeopleData.AddNewPerson(PDTO);");
+            else
+                sb.AppendLine($"this.{tableInfo.Columns.First().ColumnName} = cls{tableInfo.TableName}Data.AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}({tableInfo.TableName[0].ToString().ToUpper()}DTO);");
+            sb.AppendLine("");
+            sb.AppendLine($"       return (this.{tableInfo.Columns.First().ColumnName} > 0);");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
-            code.AppendLine("");
-
-            if (SelectedTable == "People")
-                code.AppendLine($"       this.{Properties[0, 1]} = cls{SelectedTable}Data.AddNewPerson(StoredProcedure, parameters);");
-            else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s")
-				code.AppendLine($"       this.{Properties[0, 1]} = cls{SelectedTable}Data.AddNew{SelectedTable.Remove(SelectedTable.Length - 1)}(StoredProcedure, parameters);");
-			else
-				code.AppendLine($"       this.{Properties[0, 1]} = cls{SelectedTable}Data.AddNew{SelectedTable}(StoredProcedure, parameters);");
-			
-            code.AppendLine("");
-            code.AppendLine($"        return (this.{Properties[0, 1]} != null);");
-            code.AppendLine("     }");
-            code.AppendLine("");
+            // Async.
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"private async Task<bool> _AddNewPersonAsync()");
+            else
+                sb.AppendLine($"private async Task<bool> _AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async()");
+            sb.AppendLine("    {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"this.{tableInfo.Columns.First().ColumnName} = await clsPeopleData.AddNewPersonAsync(PDTO);");
+            else
+                sb.AppendLine($"this.{tableInfo.Columns.First().ColumnName} = await cls{tableInfo.TableName}Data.AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async({tableInfo.TableName[0].ToString().ToUpper()}DTO);");
+            sb.AppendLine("");
+            sb.AppendLine($"       return (this.{tableInfo.Columns.First().ColumnName} > 0);");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
             // =====================================================================================================================
             // Update Function.
-            code.AppendLine($"    private bool _Update{SelectedTable}()");
-            code.AppendLine("     {");
-            code.AppendLine("       // parameters");
-            code.AppendLine($"       SqlParameter[] parameters = new SqlParameter[{Properties.GetLength(0)}];");
-
-            for (int i = 0; i < Properties.GetLength(0); i++)
-            {
-                string propertyName = Properties[i, 1];
-
-                code.AppendLine($"    parameters[{i}] = new SqlParameter(\"{propertyName}\", this.{propertyName});");
-            }
-
-            // Stored Procedure Name.
-            code.AppendLine("// Stored Procedure Name.");
-			if (SelectedTable == "People")
-				code.AppendLine($"       string StoredProcedure = \"SP_UpdatePerson\";");
-			else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-                code.AppendLine($"       string StoredProcedure = \"SP_Update{SelectedTable.Remove(SelectedTable.Length - 1)}\";");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"private bool _UpdatePerson()");
             else
-                code.AppendLine($"       string StoredProcedure = \"SP_Update{SelectedTable}\";");
-
-            code.AppendLine("");
-
-            if (SelectedTable == "People")
-                code.AppendLine($"       return cls{SelectedTable}Data.UpdatePerson(StoredProcedure, parameters);");
-            else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s")
-				code.AppendLine($"       return cls{SelectedTable}Data.Update{SelectedTable.Remove(SelectedTable.Length - 1)}(StoredProcedure, parameters);");
+                sb.AppendLine($"private bool _Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}()");
+            sb.AppendLine("     {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"        return clsPeopleData.UpdatePerson(PDTO);");
             else
-				code.AppendLine($"       return cls{SelectedTable}Data.Update{SelectedTable}(StoredProcedure, parameters);");
+                sb.AppendLine($"        return cls{tableInfo.TableName}Data.Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}({tableInfo.TableName[0].ToString().ToUpper()}DTO);");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
 
-			code.AppendLine("     }");
-            code.AppendLine();
+            // Async.
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"private async Task<bool> _UpdatePersonAsync()");
+            else
+                sb.AppendLine($"private async Task<bool> _Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async()");
+            sb.AppendLine("     {");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"        return await clsPeopleData.UpdatePersonAsync(PDTO);");
+            else
+                sb.AppendLine($"        return await cls{tableInfo.TableName}Data.Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async({tableInfo.TableName[0].ToString().ToUpper()}DTO);");
+            sb.AppendLine("     }");
+            sb.AppendLine("");
 
             // =====================================================================================================================
             // Save Function.
-            code.AppendLine($"    public bool Save()");
-            code.AppendLine("    {");
-            code.AppendLine("        switch (Mode)");
-            code.AppendLine("        {");
-            code.AppendLine($"            case enMode.AddNew:");
-            code.AppendLine($"                if (_AddNew{SelectedTable}())");
-            code.AppendLine("                {");
-            code.AppendLine($"                    this.Mode = enMode.Update;");
-            code.AppendLine("                    return true;");
-            code.AppendLine("                }");
-            code.AppendLine("                else");
-            code.AppendLine("                    return false;");
-            code.AppendLine();
-            code.AppendLine($"            case enMode.Update:");
-            code.AppendLine($"                return _Update{SelectedTable}();");
-            code.AppendLine();
-            code.AppendLine("        }");
-            code.AppendLine("        return false;");
-            code.AppendLine("    }");
-            code.AppendLine();
+            sb.AppendLine($"    public bool Save()");
+            sb.AppendLine("    {");
+            sb.AppendLine("        switch (Mode)");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            case enMode.AddNew:");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"                if (_AddNewPerson())");
+            else
+                sb.AppendLine($"                if (_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}())");
+            sb.AppendLine("                {");
+            sb.AppendLine($"                    this.Mode = enMode.Update;");
+            sb.AppendLine("                    return true;");
+            sb.AppendLine("                }");
+            sb.AppendLine("                else");
+            sb.AppendLine("                    return false;");
+            sb.AppendLine();
+            sb.AppendLine($"            case enMode.Update:");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"                return _UpdatePerson();");
+            else
+                sb.AppendLine($"                return _Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}();");
+            sb.AppendLine("        }");
+            sb.AppendLine("        return false;");
+            sb.AppendLine("    }");
+            sb.AppendLine();
+
+            // Async
+            sb.AppendLine($"    public async Task<bool> SaveAsync()");
+            sb.AppendLine("    {");
+            sb.AppendLine("        switch (Mode)");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            case enMode.AddNew:");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"                if (await _AddNewPersonAsync())");
+            else
+                sb.AppendLine($"                if (await _AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async())");
+            sb.AppendLine("                {");
+            sb.AppendLine($"                    this.Mode = enMode.Update;");
+            sb.AppendLine("                    return true;");
+            sb.AppendLine("                }");
+            sb.AppendLine("                else");
+            sb.AppendLine("                    return false;");
+            sb.AppendLine();
+            sb.AppendLine($"            case enMode.Update:");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"                return await _UpdatePersonAsync();");
+            else
+                sb.AppendLine($"                return await _Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Async();");
+            sb.AppendLine("        }");
+            sb.AppendLine("        return false;");
+            sb.AppendLine("    }");
+            sb.AppendLine();
 
             // =====================================================================================================================
-            // Find Function.
-            code.AppendLine($"    public static cls{SelectedTable} FindBy{Properties[0, 1]}({Properties[0, 0]} {Properties[0, 1]})");
-            code.AppendLine("    {");
-            code.AppendLine("       // parameters");
-            code.AppendLine($"       SqlParameter[] parameters = new SqlParameter[{Properties.GetLength(0)}];");
-
-            for (int i = 0; i < Properties.GetLength(0); i++)
-            {
-                string propertyName = Properties[i, 1];
-
-                if (i == 0)
-                    code.AppendLine($"   parameters[{i}] = new SqlParameter(\"{propertyName}\", {propertyName});");
-                else
-                    code.AppendLine($"   parameters[{i}] = new SqlParameter(\"{propertyName}\", null);");
-            }
-
-            code.AppendLine("// Stored Procedure Name.");
-			if (SelectedTable == "People")
-				code.AppendLine($"       string StoredProcedure = \"SP_FindPerson\";");
-			else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-                code.AppendLine($"       string StoredProcedure = \"SP_Find{SelectedTable.Remove(SelectedTable.Length - 1)}\";");
+            // Get .
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"    public static cls{tableInfo.TableName}? GetPersonByID(int? id)");
             else
-                code.AppendLine($"       string StoredProcedure = \"SP_Find{SelectedTable}\";");
+                sb.AppendLine($"    public static cls{tableInfo.TableName}? Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID(int? id)");
+            sb.AppendLine("    {");
+            sb.AppendLine($"           if (id < 1 || id == null) return null;");
+            sb.AppendLine("");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"        {tableInfo.TableName}DTO? {tableInfo.TableName[0].ToString().ToLower()}DTO = cls{tableInfo.TableName}Data.GetPersonByID(id);");
+            else
+                sb.AppendLine($"        {tableInfo.TableName}DTO? {tableInfo.TableName[0].ToString().ToLower()}DTO = cls{tableInfo.TableName}Data.Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID(id);");
+            sb.AppendLine("");
+            sb.AppendLine($"        if ({tableInfo.TableName[0].ToString().ToLower()}DTO != null)");
+            sb.AppendLine("         {");
+            sb.AppendLine($"             return new cls{tableInfo.TableName}({tableInfo.TableName[0].ToString().ToLower()}DTO, enMode.Update);");
+            sb.AppendLine("         }");
+            sb.AppendLine("         else");
+            sb.AppendLine("             return null;");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
-            code.AppendLine("");
-
-			if (SelectedTable == "People")
-				code.AppendLine($"if (cls{SelectedTable}Data.FindPerson(StoredProcedure, ref parameters))");
-            else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s")
-				code.AppendLine($"if (cls{SelectedTable}Data.Find{SelectedTable.Remove(SelectedTable.Length - 1)}(StoredProcedure, ref parameters))");
-			else
-				code.AppendLine($"if (cls{SelectedTable}Data.Find{SelectedTable}(StoredProcedure, ref parameters))");
-
-			code.AppendLine("{");
-            code.Append($"   return new cls{SelectedTable}(");
-
-            for(short i = 0; i < Properties.GetLength(0); i++)
-            {
-                string dataType = Properties[i, 0];
-
-                if (i == Properties.GetLength(0) - 1)
-                    code.AppendLine($"{GetExpression(dataType)}parameters[{i}].Value);"); // without seperator.
-                else
-                    code.Append($"{GetExpression(dataType)}parameters[{i}].Value, "); // with seperator.
-            }
-
-            code.AppendLine("}");
-            code.AppendLine("else");
-            code.AppendLine("   return null;");
-            code.AppendLine("");
-            code.AppendLine("    }");
-            code.AppendLine("");
+            // Async.
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"    public static async Task<cls{tableInfo.TableName}?> GetPersonByIDAsync(int? id)");
+            else
+                sb.AppendLine($"    public static async Task<cls{tableInfo.TableName}?> Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(int? id)");
+            sb.AppendLine("    {");
+            sb.AppendLine($"           if (id < 1 || id == null) return null;");
+            sb.AppendLine("");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"        {tableInfo.TableName}DTO? {tableInfo.TableName[0].ToString().ToLower()}DTO = await cls{tableInfo.TableName}Data.GetPersonByIDAsync(id);");
+            else
+                sb.AppendLine($"        {tableInfo.TableName}DTO? {tableInfo.TableName[0].ToString().ToLower()}DTO = await cls{tableInfo.TableName}Data.Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(id);");
+            sb.AppendLine("");
+            sb.AppendLine($"        if ({tableInfo.TableName[0].ToString().ToLower()}DTO != null)");
+            sb.AppendLine("         {");
+            sb.AppendLine($"             return new cls{tableInfo.TableName}({tableInfo.TableName[0].ToString().ToLower()}DTO, enMode.Update);");
+            sb.AppendLine("         }");
+            sb.AppendLine("         else");
+            sb.AppendLine("             return null;");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
             // =====================================================================================================================
             // IsExists Function.
-            code.AppendLine($"    public static bool IsExist({Properties[0, 0]} {Properties[0, 1]})");
-            code.AppendLine("    {");
-            code.AppendLine($"       SqlParameter parameter = new SqlParameter(\"{Properties[0, 1]}\", {Properties[0, 1]});");
-            code.AppendLine("");
-
-            code.AppendLine("// Stored Procedure Name.");
-			if (SelectedTable == "People")
-				code.AppendLine($"       string StoredProcedure = \"SP_IsPersonExists\";");
-			if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-                code.AppendLine($"       string StoredProcedure = \"SP_Is{SelectedTable.Remove(SelectedTable.Length - 1)}Exists\";");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"    public static bool IsPersonExistsByID(int? id)");
             else
-                code.AppendLine($"       string StoredProcedure = \"SP_Is{SelectedTable}Exists\";");
-
-            code.AppendLine("");
-
-			if (SelectedTable == "People")
-				code.AppendLine($"       return cls{SelectedTable}Data.IsPersonExists(StoredProcedure, parameter);");
-			else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-				code.AppendLine($"       return cls{SelectedTable}Data.Is{SelectedTable.Remove(SelectedTable.Length - 1)}Exists(StoredProcedure, parameter);");
+                sb.AppendLine($"    public static bool Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByID(int? id)");
+            sb.AppendLine("    {");
+            sb.AppendLine("           if (id < 1 || id == null) return false;");
+            sb.AppendLine("");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"       return cls{tableInfo.TableName}Data.IsPersonExistsByID(id);");
             else
-				code.AppendLine($"       return cls{SelectedTable}Data.Is{SelectedTable}Exists(StoredProcedure, parameter);");
+                sb.AppendLine($"       return cls{tableInfo.TableName}Data.Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByID(id);");
+			sb.AppendLine("    }");
+            sb.AppendLine("");
 
-			code.AppendLine("    }");
-            code.AppendLine("");
+            // Async
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"    public static async Task<bool> IsPersonExistsByIDAsync(int? id)");
+            else
+                sb.AppendLine($"    public static async Task<bool> Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByIDAsync(int? id)");
+            sb.AppendLine("    {");
+            sb.AppendLine("           if (id < 1 || id == null) return false;");
+            sb.AppendLine("");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"       return await cls{tableInfo.TableName}Data.IsPersonExistsByIDAsync(id);");
+            else
+                sb.AppendLine($"       return await cls{tableInfo.TableName}Data.Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ExistsByIDAsync(id);");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
             // =====================================================================================================================
             // Delete Function.
-            code.AppendLine($"    public static bool Delete({Properties[0, 0]} {Properties[0, 1]})");
-            code.AppendLine("    {");
-            code.AppendLine($"       SqlParameter parameter = new SqlParameter(\"{Properties[0, 1]}\", {Properties[0, 1]});");
-            code.AppendLine("");
-
-            code.AppendLine("// Stored Procedure Name.");
-			if (SelectedTable == "People")
-				code.AppendLine($"       string StoredProcedure = \"SP_DeletePerson\";");
-			if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-                code.AppendLine($"       string StoredProcedure = \"SP_Delete{SelectedTable.Remove(SelectedTable.Length - 1)}\";");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"    public static bool DeletePersonByID(int? id)");
             else
-                code.AppendLine($"       string StoredProcedure = \"SP_Delete{SelectedTable}\";");
-
-            code.AppendLine("");
-			if (SelectedTable == "People")
-				code.AppendLine($"       return cls{SelectedTable}Data.DeletePerson(StoredProcedure, parameter);");
-            else if (SelectedTable[SelectedTable.Length - 1].ToString().ToLower() == "s") // for remove last char if it was = 's'.
-				code.AppendLine($"       return cls{SelectedTable}Data.Delete{SelectedTable.Remove(SelectedTable.Length - 1)}(StoredProcedure, parameter);");
+                sb.AppendLine($"    public static bool Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID(int? id)");
+            sb.AppendLine("    {");
+            sb.AppendLine("           if (id < 1 || id == null) return false;");
+            sb.AppendLine("");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"       return cls{tableInfo.TableName}Data.DeletePersonByID(id);");
             else
-				code.AppendLine($"       return cls{SelectedTable}Data.Delete{SelectedTable}(StoredProcedure, parameter);");
+                sb.AppendLine($"       return cls{tableInfo.TableName}Data.Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID(id);");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
-			code.AppendLine("    }");
+            // Async
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"    public static async Task<bool> DeletePersonByIDAsync(int? id)");
+            else
+                sb.AppendLine($"    public static async Task<bool> Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(int? id)");
+            sb.AppendLine("    {");
+            sb.AppendLine("           if (id < 1 || id == null) return false;");
+            sb.AppendLine("");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"       return await cls{tableInfo.TableName}Data.DeletePersonByIDAsync(id);");
+            else
+                sb.AppendLine($"       return await cls{tableInfo.TableName}Data.Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(id);");
+            sb.AppendLine("    }");
+            sb.AppendLine("");
 
 
-            return code.ToString();
+            return sb.ToString();
         }
 
     }

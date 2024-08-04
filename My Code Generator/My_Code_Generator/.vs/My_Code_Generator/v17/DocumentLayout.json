@@ -1,15 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\Osama Projects\\Code_Generator\\My Code Generator\\My_Code_Generator\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{ECDC6B39-316A-4A1F-86DC-FBCFD3B2975B}|..\\Code Generator Business\\Code Generator Business.csproj|d:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\osama projects\\code_generator\\my code generator\\code generator business\\clsgeneratorbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{B60374E5-A2C7-42A6-8AA4-7860E0672FA0}|My_Code_Generator.csproj|d:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\osama projects\\code_generator\\my code generator\\my_code_generator\\business access forms\\frmbusinessaccesslayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{B60374E5-A2C7-42A6-8AA4-7860E0672FA0}|My_Code_Generator.csproj|solutionrelative:business access forms\\frmbusinessaccesslayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -17,22 +9,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": -1,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "clsGeneratorBusiness.cs",
-              "DocumentMoniker": "D:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\Osama Projects\\Code_Generator\\My Code Generator\\Code Generator Business\\clsGeneratorBusiness.cs",
-              "RelativeDocumentMoniker": "..\\Code Generator Business\\clsGeneratorBusiness.cs",
-              "ToolTip": "D:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\Osama Projects\\Code_Generator\\My Code Generator\\Code Generator Business\\clsGeneratorBusiness.cs",
-              "RelativeToolTip": "..\\Code Generator Business\\clsGeneratorBusiness.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAACQAAAAJAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-03T22:48:58.133Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{c6f34f0d-7ae5-4f3a-be61-fe0c21ae9eb8}"
@@ -64,18 +42,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "frmBusinessAccessLayer.cs [Design]",
-              "DocumentMoniker": "D:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\Osama Projects\\Code_Generator\\My Code Generator\\My_Code_Generator\\Business Access Forms\\frmBusinessAccessLayer.cs",
-              "RelativeDocumentMoniker": "Business Access Forms\\frmBusinessAccessLayer.cs",
-              "ToolTip": "D:\\\u0633\u0637\u062D \u0627\u0644\u0645\u0643\u062A\u0628\\Osama Projects\\Code_Generator\\My Code Generator\\My_Code_Generator\\Business Access Forms\\frmBusinessAccessLayer.cs [Design]",
-              "RelativeToolTip": "Business Access Forms\\frmBusinessAccessLayer.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-03T22:50:30.289Z",
-              "EditorCaption": " [Design]"
             }
           ]
         },
