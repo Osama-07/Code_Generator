@@ -33,37 +33,6 @@ namespace Generator_Code_Data
         private static string SourceName = Assembly.GetExecutingAssembly().GetName().Name;
         private static string ConnectionString = clsSettingsDataAccess.ConnectionString;
 
-        private static string GetDataType(string sqlType)
-        {
-            switch (sqlType.ToLower())
-            {
-                case "bit": return "bool";
-                case "tinyint": return "byte";
-                case "smallint": return "short";
-                case "int": return "int";
-                case "bigint": return "long";
-                case "decimal":
-                case "numeric": return "decimal";
-                case "money":
-                case "smallmoney": return "decimal";
-                case "float": return "double";
-                case "real": return "float";
-                case "datetime":
-                case "smalldatetime":
-                case "date": return "DateTime";
-                case "char":
-                case "nchar":
-                case "varchar":
-                case "nvarchar":
-                case "text":
-                case "ntext": return "string";
-                case "binary":
-                case "varbinary":
-                case "image": return "byte[]";
-                default: return "object"; // Fallback to the general object type
-            }
-        }
-
         public static List<string> GetDatabases()
         {
             List<string> DatabasesName = new List<string>();
@@ -155,7 +124,7 @@ namespace Generator_Code_Data
                                 columns.Add(new ColumnInfo
                                 {
                                     ColumnName = reader["COLUMN_NAME"].ToString(),
-                                    DataType = GetDataType(reader["DATA_TYPE"].ToString()),
+                                    DataType = reader["DATA_TYPE"].ToString(),
                                     IsNullable = reader["IS_NULLABLE"].ToString() == "YES",
                                     MaxCharacters = reader["CHARACTER_MAXIMUM_LENGTH"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CHARACTER_MAXIMUM_LENGTH"]) : null,
                                     NumberOfColumn = ++columnNumber

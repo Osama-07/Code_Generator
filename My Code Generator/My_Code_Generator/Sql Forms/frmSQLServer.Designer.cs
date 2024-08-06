@@ -36,10 +36,10 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.txtGeneratorCode = new System.Windows.Forms.TextBox();
-            this.btnGenerateSQLCode = new Guna.UI2.WinForms.Guna2Button();
+            this.btnAddNew = new Guna.UI2.WinForms.Guna2Button();
             this.btnUpdate = new Guna.UI2.WinForms.Guna2Button();
-            this.btnDeleteCode = new Guna.UI2.WinForms.Guna2Button();
-            this.btnFindCode = new Guna.UI2.WinForms.Guna2Button();
+            this.btnDelete = new Guna.UI2.WinForms.Guna2Button();
+            this.btnGet = new Guna.UI2.WinForms.Guna2Button();
             this.btnGenerateAll = new Guna.UI2.WinForms.Guna2Button();
             this.btnIsExists = new Guna.UI2.WinForms.Guna2Button();
             this.SuspendLayout();
@@ -183,31 +183,31 @@
             this.txtGeneratorCode.Name = "txtGeneratorCode";
             this.txtGeneratorCode.ReadOnly = true;
             this.txtGeneratorCode.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtGeneratorCode.Size = new System.Drawing.Size(1520, 698);
+            this.txtGeneratorCode.Size = new System.Drawing.Size(1562, 698);
             this.txtGeneratorCode.TabIndex = 35;
             // 
-            // btnGenerateSQLCode
+            // btnAddNew
             // 
-            this.btnGenerateSQLCode.Animated = true;
-            this.btnGenerateSQLCode.AutoRoundedCorners = true;
-            this.btnGenerateSQLCode.BorderColor = System.Drawing.Color.White;
-            this.btnGenerateSQLCode.BorderRadius = 27;
-            this.btnGenerateSQLCode.BorderThickness = 1;
-            this.btnGenerateSQLCode.CheckedState.Parent = this.btnGenerateSQLCode;
-            this.btnGenerateSQLCode.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnGenerateSQLCode.CustomImages.Parent = this.btnGenerateSQLCode;
-            this.btnGenerateSQLCode.FillColor = System.Drawing.Color.DarkOliveGreen;
-            this.btnGenerateSQLCode.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnGenerateSQLCode.ForeColor = System.Drawing.Color.White;
-            this.btnGenerateSQLCode.HoverState.Parent = this.btnGenerateSQLCode;
-            this.btnGenerateSQLCode.Location = new System.Drawing.Point(111, 210);
-            this.btnGenerateSQLCode.Margin = new System.Windows.Forms.Padding(4);
-            this.btnGenerateSQLCode.Name = "btnGenerateSQLCode";
-            this.btnGenerateSQLCode.ShadowDecoration.Parent = this.btnGenerateSQLCode;
-            this.btnGenerateSQLCode.Size = new System.Drawing.Size(214, 57);
-            this.btnGenerateSQLCode.TabIndex = 46;
-            this.btnGenerateSQLCode.Text = "Generate ADD NEW";
-            this.btnGenerateSQLCode.Click += new System.EventHandler(this.btnGenerateSQLCode_Click);
+            this.btnAddNew.Animated = true;
+            this.btnAddNew.AutoRoundedCorners = true;
+            this.btnAddNew.BorderColor = System.Drawing.Color.White;
+            this.btnAddNew.BorderRadius = 27;
+            this.btnAddNew.BorderThickness = 1;
+            this.btnAddNew.CheckedState.Parent = this.btnAddNew;
+            this.btnAddNew.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnAddNew.CustomImages.Parent = this.btnAddNew;
+            this.btnAddNew.FillColor = System.Drawing.Color.DarkOliveGreen;
+            this.btnAddNew.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnAddNew.ForeColor = System.Drawing.Color.White;
+            this.btnAddNew.HoverState.Parent = this.btnAddNew;
+            this.btnAddNew.Location = new System.Drawing.Point(111, 210);
+            this.btnAddNew.Margin = new System.Windows.Forms.Padding(4);
+            this.btnAddNew.Name = "btnAddNew";
+            this.btnAddNew.ShadowDecoration.Parent = this.btnAddNew;
+            this.btnAddNew.Size = new System.Drawing.Size(214, 57);
+            this.btnAddNew.TabIndex = 46;
+            this.btnAddNew.Text = "ADD NEW";
+            this.btnAddNew.Click += new System.EventHandler(this.btnAddNew_Click);
             // 
             // btnUpdate
             // 
@@ -229,54 +229,54 @@
             this.btnUpdate.ShadowDecoration.Parent = this.btnUpdate;
             this.btnUpdate.Size = new System.Drawing.Size(214, 57);
             this.btnUpdate.TabIndex = 48;
-            this.btnUpdate.Text = "Generate UPDATE";
+            this.btnUpdate.Text = "UPDATE";
             this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
             // 
-            // btnDeleteCode
+            // btnDelete
             // 
-            this.btnDeleteCode.Animated = true;
-            this.btnDeleteCode.AutoRoundedCorners = true;
-            this.btnDeleteCode.BorderColor = System.Drawing.Color.White;
-            this.btnDeleteCode.BorderRadius = 27;
-            this.btnDeleteCode.BorderThickness = 1;
-            this.btnDeleteCode.CheckedState.Parent = this.btnDeleteCode;
-            this.btnDeleteCode.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDeleteCode.CustomImages.Parent = this.btnDeleteCode;
-            this.btnDeleteCode.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.btnDeleteCode.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnDeleteCode.ForeColor = System.Drawing.Color.White;
-            this.btnDeleteCode.HoverState.Parent = this.btnDeleteCode;
-            this.btnDeleteCode.Location = new System.Drawing.Point(575, 210);
-            this.btnDeleteCode.Margin = new System.Windows.Forms.Padding(4);
-            this.btnDeleteCode.Name = "btnDeleteCode";
-            this.btnDeleteCode.ShadowDecoration.Parent = this.btnDeleteCode;
-            this.btnDeleteCode.Size = new System.Drawing.Size(214, 57);
-            this.btnDeleteCode.TabIndex = 49;
-            this.btnDeleteCode.Text = "Generate DELETE";
-            this.btnDeleteCode.Click += new System.EventHandler(this.btnDeleteCode_Click);
+            this.btnDelete.Animated = true;
+            this.btnDelete.AutoRoundedCorners = true;
+            this.btnDelete.BorderColor = System.Drawing.Color.White;
+            this.btnDelete.BorderRadius = 27;
+            this.btnDelete.BorderThickness = 1;
+            this.btnDelete.CheckedState.Parent = this.btnDelete;
+            this.btnDelete.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDelete.CustomImages.Parent = this.btnDelete;
+            this.btnDelete.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnDelete.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnDelete.ForeColor = System.Drawing.Color.White;
+            this.btnDelete.HoverState.Parent = this.btnDelete;
+            this.btnDelete.Location = new System.Drawing.Point(575, 210);
+            this.btnDelete.Margin = new System.Windows.Forms.Padding(4);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.ShadowDecoration.Parent = this.btnDelete;
+            this.btnDelete.Size = new System.Drawing.Size(214, 57);
+            this.btnDelete.TabIndex = 49;
+            this.btnDelete.Text = "DELETE";
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
-            // btnFindCode
+            // btnGet
             // 
-            this.btnFindCode.Animated = true;
-            this.btnFindCode.AutoRoundedCorners = true;
-            this.btnFindCode.BorderColor = System.Drawing.Color.White;
-            this.btnFindCode.BorderRadius = 27;
-            this.btnFindCode.BorderThickness = 1;
-            this.btnFindCode.CheckedState.Parent = this.btnFindCode;
-            this.btnFindCode.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnFindCode.CustomImages.Parent = this.btnFindCode;
-            this.btnFindCode.FillColor = System.Drawing.Color.DarkSlateGray;
-            this.btnFindCode.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnFindCode.ForeColor = System.Drawing.Color.White;
-            this.btnFindCode.HoverState.Parent = this.btnFindCode;
-            this.btnFindCode.Location = new System.Drawing.Point(797, 210);
-            this.btnFindCode.Margin = new System.Windows.Forms.Padding(4);
-            this.btnFindCode.Name = "btnFindCode";
-            this.btnFindCode.ShadowDecoration.Parent = this.btnFindCode;
-            this.btnFindCode.Size = new System.Drawing.Size(214, 57);
-            this.btnFindCode.TabIndex = 50;
-            this.btnFindCode.Text = "Generate FIND";
-            this.btnFindCode.Click += new System.EventHandler(this.btnFindCode_Click);
+            this.btnGet.Animated = true;
+            this.btnGet.AutoRoundedCorners = true;
+            this.btnGet.BorderColor = System.Drawing.Color.White;
+            this.btnGet.BorderRadius = 27;
+            this.btnGet.BorderThickness = 1;
+            this.btnGet.CheckedState.Parent = this.btnGet;
+            this.btnGet.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnGet.CustomImages.Parent = this.btnGet;
+            this.btnGet.FillColor = System.Drawing.Color.DarkSlateGray;
+            this.btnGet.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnGet.ForeColor = System.Drawing.Color.White;
+            this.btnGet.HoverState.Parent = this.btnGet;
+            this.btnGet.Location = new System.Drawing.Point(797, 210);
+            this.btnGet.Margin = new System.Windows.Forms.Padding(4);
+            this.btnGet.Name = "btnGet";
+            this.btnGet.ShadowDecoration.Parent = this.btnGet;
+            this.btnGet.Size = new System.Drawing.Size(214, 57);
+            this.btnGet.TabIndex = 50;
+            this.btnGet.Text = "GET";
+            this.btnGet.Click += new System.EventHandler(this.btnGet_Click);
             // 
             // btnGenerateAll
             // 
@@ -298,7 +298,7 @@
             this.btnGenerateAll.ShadowDecoration.Parent = this.btnGenerateAll;
             this.btnGenerateAll.Size = new System.Drawing.Size(214, 57);
             this.btnGenerateAll.TabIndex = 51;
-            this.btnGenerateAll.Text = "Generate ALL";
+            this.btnGenerateAll.Text = "ALL";
             this.btnGenerateAll.Click += new System.EventHandler(this.btnGenerateAll_Click);
             // 
             // btnIsExists
@@ -321,7 +321,7 @@
             this.btnIsExists.ShadowDecoration.Parent = this.btnIsExists;
             this.btnIsExists.Size = new System.Drawing.Size(214, 57);
             this.btnIsExists.TabIndex = 52;
-            this.btnIsExists.Text = "Generate IsExists";
+            this.btnIsExists.Text = "IsExists";
             this.btnIsExists.Click += new System.EventHandler(this.btnIsExists_Click);
             // 
             // frmSQLServer
@@ -330,13 +330,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.ClientSize = new System.Drawing.Size(1541, 928);
+            this.ClientSize = new System.Drawing.Size(1583, 928);
             this.Controls.Add(this.btnIsExists);
             this.Controls.Add(this.btnGenerateAll);
-            this.Controls.Add(this.btnFindCode);
-            this.Controls.Add(this.btnDeleteCode);
+            this.Controls.Add(this.btnGet);
+            this.Controls.Add(this.btnDelete);
             this.Controls.Add(this.btnUpdate);
-            this.Controls.Add(this.btnGenerateSQLCode);
+            this.Controls.Add(this.btnAddNew);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtGeneratorCode);
             this.Controls.Add(this.cmbColumns);
@@ -365,10 +365,10 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtGeneratorCode;
-        private Guna.UI2.WinForms.Guna2Button btnGenerateSQLCode;
+        private Guna.UI2.WinForms.Guna2Button btnAddNew;
         private Guna.UI2.WinForms.Guna2Button btnUpdate;
-        private Guna.UI2.WinForms.Guna2Button btnDeleteCode;
-        private Guna.UI2.WinForms.Guna2Button btnFindCode;
+        private Guna.UI2.WinForms.Guna2Button btnDelete;
+        private Guna.UI2.WinForms.Guna2Button btnGet;
         private Guna.UI2.WinForms.Guna2Button btnGenerateAll;
         private Guna.UI2.WinForms.Guna2Button btnIsExists;
     }

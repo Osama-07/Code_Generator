@@ -52,7 +52,36 @@ namespace Code_Generator_Business
                     return "GetValue"; // Fallback to the general GetValue method
             }
         }
-
+        private static string GetDataType(string sqlType)
+        {
+            switch (sqlType.ToLower())
+            {
+                case "bit": return "bool";
+                case "tinyint": return "byte";
+                case "smallint": return "short";
+                case "int": return "int";
+                case "bigint": return "long";
+                case "decimal":
+                case "numeric": return "decimal";
+                case "money":
+                case "smallmoney": return "decimal";
+                case "float": return "double";
+                case "real": return "float";
+                case "datetime":
+                case "smalldatetime":
+                case "date": return "DateTime";
+                case "char":
+                case "nchar":
+                case "varchar":
+                case "nvarchar":
+                case "text":
+                case "ntext": return "string";
+                case "binary":
+                case "varbinary":
+                case "image": return "byte[]";
+                default: return "object"; // Fallback to the general object type
+            }
+        }
 
         public static string DTO(TableInfo tableInfo)
         {
@@ -100,12 +129,13 @@ namespace Code_Generator_Business
                 }
 
                 // attr [MaxLength].
-                if (column.DataType == "string")
+                string dataType = GetDataType(column.DataType);
+                if (dataType == "string")
                 {
                     sb.AppendLine($"[MaxLength({column.MaxCharacters}, ErrorMessage = \"{column.ColumnName} cannot exceed {column.MaxCharacters} characters.\")]");
                 }
 
-                sb.Append($"public {column.DataType}");
+                sb.Append($"public {dataType}");
                 // if Nullable add '?'.
                 if (column.IsNullable)
                     sb.Append("? ");
@@ -117,7 +147,7 @@ namespace Code_Generator_Business
                 if (column.IsNullable)
                     sb.Append("// allow null. ");
 
-                if (column.DataType == "string")
+                if (dataType == "string")
                     sb.AppendLine($"// Length: {column.MaxCharacters}");
                 
                 sb.AppendLine("}");
@@ -317,10 +347,11 @@ namespace Code_Generator_Business
             sb.AppendLine("       (");
             foreach (var column in tableInfo.Columns)
             {
+                string dataType = GetDataType(column.DataType);
                 if (column.IsNullable)
-                    sb.Append($"           reader.IsDBNull(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"           reader.IsDBNull(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
                 else
-                    sb.Append($"           reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"           reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
 
                 if (column.NumberOfColumn < tableInfo.Columns.Count)
                     sb.Append(',');
@@ -392,10 +423,11 @@ namespace Code_Generator_Business
             sb.AppendLine("       (");
             foreach (var column in tableInfo.Columns)
             {
+                string dataType = GetDataType(column.DataType);
                 if (column.IsNullable)
-                    sb.Append($"           await reader.IsDBNullAsync(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"           await reader.IsDBNullAsync(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
                 else
-                    sb.Append($"           reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"           reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
 
                 if (column.NumberOfColumn < tableInfo.Columns.Count)
                     sb.Append(',');
@@ -824,10 +856,11 @@ namespace Code_Generator_Business
             sb.AppendLine("                         ");
             foreach (var column in tableInfo.Columns)
             {
+                string dataType = GetDataType(column.DataType);
                 if (column.IsNullable)
-                    sb.Append($"                        reader.IsDBNull(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"                        reader.IsDBNull(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
                 else
-                    sb.Append($"                        reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"                        reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
 
                 if (column.NumberOfColumn < tableInfo.Columns.Count)
                     sb.Append(',');
@@ -882,10 +915,11 @@ namespace Code_Generator_Business
             sb.AppendLine($"                   {tableInfo.TableName}List.Add(new {tableInfo.TableName}DTO(");
             foreach (var column in tableInfo.Columns)
             {
+                string dataType = GetDataType(column.DataType);
                 if (column.IsNullable)
-                    sb.Append($"                        await reader.IsDBNullAsync(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"                        await reader.IsDBNullAsync(reader.GetOrdinal(\"{column.ColumnName}\")) ? null : reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
                 else
-                    sb.Append($"                        reader.{_GetSqlDataReaderMethod(column.DataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
+                    sb.Append($"                        reader.{_GetSqlDataReaderMethod(dataType)}(reader.GetOrdinal(\"{column.ColumnName}\"))");
 
                 if (column.NumberOfColumn < tableInfo.Columns.Count)
                     sb.Append(',');

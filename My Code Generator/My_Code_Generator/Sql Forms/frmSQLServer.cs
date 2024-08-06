@@ -1,4 +1,5 @@
-﻿using Generator_Code_Data;
+﻿using Code_Generator_Business;
+using Generator_Code_Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,55 +91,53 @@ namespace My_Code_Generator.Forms
             }
         }
 
-        private void btnGenerateSQLCode_Click(object sender, EventArgs e)
+        private void btnAddNew_Click(object sender, EventArgs e)
         {
-            /*string SelectedDatabase = cmbDatabases.SelectedItem.ToString();
-            string SelectedTable = cmbTables.SelectedItem.ToString();
+            var database = databaseSchemas.FirstOrDefault(s => s.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.FirstOrDefault(s => s.TableName == cmbTables.Text);
 
-            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(SelectedDatabase, SelectedTable);
-
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_AddNewCode(SelectedTable, parameters);*/
+            txtGeneratorCode.Text = clsGetSQLCode.SP_AddNew(table);
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            /*string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            var database = databaseSchemas.FirstOrDefault(s => s.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.FirstOrDefault(s => s.TableName == cmbTables.Text);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_UpdateCode(tableName, parameters);*/
+            txtGeneratorCode.Text = clsGetSQLCode.SP_Update(table);
         }
 
-        private void btnDeleteCode_Click(object sender, EventArgs e)
+        private void btnDelete_Click(object sender, EventArgs e)
         {
-            /*string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            var database = databaseSchemas.FirstOrDefault(s => s.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.FirstOrDefault(s => s.TableName == cmbTables.Text);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_DeleteCode(tableName, parameters);*/
+            txtGeneratorCode.Text = clsGetSQLCode.SP_Delete(table);
         }
-
-        private void btnFindCode_Click(object sender, EventArgs e)
+        private void btnGet_Click(object sender, EventArgs e)
         {
-            /*string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            var database = databaseSchemas.FirstOrDefault(s => s.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.FirstOrDefault(s => s.TableName == cmbTables.Text);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_FindCode(tableName, parameters);*/
-        }
-
-        private void btnGenerateAll_Click(object sender, EventArgs e)
-        {
-            /*string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
-
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateAll(tableName, parameters);*/
+            txtGeneratorCode.Text = clsGetSQLCode.SP_Get(table);
         }
 
         private void btnIsExists_Click(object sender, EventArgs e)
         {
-            /*string tableName = cmbTables.SelectedItem.ToString();
-            string[,] parameters = clsDatabaseInfoData.GetColumnSQLInfo(cmbDatabases.SelectedItem.ToString(), tableName);
+            var database = databaseSchemas.FirstOrDefault(s => s.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.FirstOrDefault(s => s.TableName == cmbTables.Text);
 
-            txtGeneratorCode.Text = clsGetSQLCode.GenerateSP_IsExistsCode(tableName, parameters);*/
+            txtGeneratorCode.Text = clsGetSQLCode.SP_IsExists(table);
         }
+
+        private void btnGenerateAll_Click(object sender, EventArgs e)
+        {
+            var database = databaseSchemas.FirstOrDefault(s => s.DatabaseName == cmbDatabases.Text);
+            var table = database.Tables.FirstOrDefault(s => s.TableName == cmbTables.Text);
+
+            txtGeneratorCode.Text = clsGetSQLCode.All(table);
+        }
+
 
     }
 }

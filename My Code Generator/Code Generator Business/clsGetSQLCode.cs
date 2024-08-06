@@ -1,175 +1,150 @@
-﻿using System;
+﻿using System.Linq;
 using System.Text;
+using Generator_Code_Data;
 
 namespace Code_Generator_Business
 {
     public class clsGetSQLCode
     {
-        public static string GenerateSP_AddNewCode(string tableName, string[,] parameters)
+
+        public static string SP_AddNew(TableInfo tableInfo)
         {
             StringBuilder sb = new StringBuilder();
 
             // CREATE PROCEDURE statement
-            if (tableName[tableName.Length - 1].ToString().ToLower() == "s")
-                sb.AppendLine($"CREATE PROCEDURE SP_AddNew{tableName.Remove(tableName.Length - 1)}");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"CREATE PROCEDURE SP_AddNewPerson");
             else
-                sb.AppendLine($"CREATE PROCEDURE SP_AddNew{tableName}");
+                sb.AppendLine($"CREATE PROCEDURE SP_AddNew{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}");
 
             sb.AppendLine("(");
 
             // Add dynamic parameters
-            for (int i = 1; i < parameters.GetLength(0); i++)
+            foreach (var column in tableInfo.Columns)
             {
+                // ignore the parameter id because it not required. (ID).
+                if (column.NumberOfColumn == 1)
+                    continue;
 
-                if (parameters[i, 2] == null || parameters[i, 2] == "")
-                {
-                    sb.AppendLine($"\t@{parameters[i, 1]} {parameters[i, 0].ToUpper()},");
-                }
-                else
-                {
-                    sb.AppendLine($"\t@{parameters[i, 1]} {parameters[i, 0].ToUpper()}({parameters[i, 2]}),");
-                }
+                sb.Append($"    @{column.ColumnName} {column.DataType.ToUpper()}");
+
+                if (column.MaxCharacters > 0)
+                    sb.Append($"({column.MaxCharacters})");
+
+                sb.AppendLine(",");
             }
-
-            sb.AppendLine("\t-- Add other parameters as needed");
-            sb.AppendLine($"\t@New{parameters[0, 1]} INT OUTPUT");
+            sb.AppendLine($"@New{tableInfo.Columns.First().ColumnName} INT OUTPUT");
             sb.AppendLine(")");
             sb.AppendLine("AS");
             sb.AppendLine("BEGIN");
             sb.AppendLine();
 
             // INSERT INTO statement
-            sb.Append($"\tINSERT INTO {tableName} (");
+            sb.AppendLine($"\tINSERT INTO {tableInfo.TableName} (");
 
             // Add dynamic parameters
-            for (int i = 1; i < parameters.GetLength(0); i++)
+            foreach (var column in tableInfo.Columns)
             {
-                // if i = last row.
-                if (i == parameters.GetLength(0) - 1)
-                {
-                    sb.Append($"{parameters[i, 1]}");
-                }
+                // ignore the parameter id because it not required. (ID).
+                if (column.NumberOfColumn == 1)
+                    continue;
+
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append($"{column.ColumnName}, ");
                 else
-                    sb.Append($"{parameters[i, 1]}, ");
-
+                    sb.Append($"{column.ColumnName}");
             }
-
             sb.AppendLine(")");
             sb.AppendLine("\tVALUES");
             sb.Append("\t(");
-
             // Add dynamic parameters
-            for (int i = 1; i < parameters.GetLength(0); i++)
+            foreach (var column in tableInfo.Columns)
             {
-                // if i = last row.
-                if (i == parameters.GetLength(0) - 1)
-                {
-                    sb.Append($"@{parameters[i, 1]}");
-                }
+                // ignore the parameter id because it not required. (ID).
+                if (column.NumberOfColumn == 1)
+                    continue;
+
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.Append($"@{column.ColumnName}, ");
                 else
-                    sb.Append($"@{parameters[i, 1]}, ");
-
+                    sb.Append($"@{column.ColumnName}");
             }
-
             sb.AppendLine(");");
             sb.AppendLine();
-
             // SET @NewID = SCOPE_IDENTITY() statement
-            sb.AppendLine($"\tSET @New{parameters[0, 1]} = SCOPE_IDENTITY();");
+            sb.AppendLine($"\tSET @New{tableInfo.Columns.First().ColumnName} = SCOPE_IDENTITY();");
             sb.AppendLine("END");
 
             return sb.ToString();
         }
 
-        public static string GenerateSP_UpdateCode(string tableName, string[,] parameters)
+        public static string SP_Update(TableInfo tableInfo)
         {
             StringBuilder sb = new StringBuilder();
 
             // CREATE PROCEDURE statement
-            if (tableName[tableName.Length - 1].ToString().ToLower() == "s")
-                sb.AppendLine($"CREATE PROCEDURE SP_Update{tableName.Remove(tableName.Length - 1)}");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"CREATE PROCEDURE SP_UpdatePerson");
             else
-                sb.AppendLine($"CREATE PROCEDURE SP_Update{tableName}");
+                sb.AppendLine($"CREATE PROCEDURE SP_Update{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}");
 
             sb.AppendLine("(");
 
             // Add dynamic parameters
-            for (int i = 0; i < parameters.GetLength(0); i++)
+            foreach (var column in tableInfo.Columns)
             {
-                // if i = last row.
-                if (i == parameters.GetLength(0) - 1)
-                {
-                    if (parameters[i, 2] == null || parameters[i, 2] == "")
-                    {
-                        sb.AppendLine($"\t@{parameters[i, 1]} {parameters[i, 0].ToUpper()}");
-                    }
-                    else
-                    {
-                        sb.AppendLine($"\t@{parameters[i, 1]} {parameters[i, 0].ToUpper()}({parameters[i, 2]})");
-                    }
+                sb.Append($"    @{column.ColumnName} {column.DataType.ToUpper()}");
 
-                    continue;
-                }
+                if (column.MaxCharacters > 0)
+                    sb.Append($"({column.MaxCharacters})");
 
-                // if i is not last row.
-                if (parameters[i, 2] == null || parameters[i, 2] == "")
-                {
-                    sb.AppendLine($"\t@{parameters[i, 1]} {parameters[i, 0].ToUpper()},");
-                }
-                else
-                {
-                    sb.AppendLine($"\t@{parameters[i, 1]} {parameters[i, 0].ToUpper()}({parameters[i, 2]}),");
-                }
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.AppendLine(",");
             }
-
             sb.AppendLine(")");
             sb.AppendLine("AS");
             sb.AppendLine("BEGIN");
             sb.AppendLine();
 
             // UPDATE statement
-            sb.AppendLine($"\tUPDATE {tableName}");
+            sb.AppendLine($"\tUPDATE {tableInfo.TableName}");
             sb.AppendLine("\tSET");
 
             // Add dynamic parameters for SET clause
-            for (int i = 1; i < parameters.GetLength(0); i++) // Start from 1 to skip the primary key
+            foreach (var column in tableInfo.Columns)
             {
-                if (i == parameters.GetLength(0) - 1)
-                    sb.AppendLine($"\t\t{parameters[i, 1]} = @{parameters[i, 1]}");
-                else
-                    sb.AppendLine($"\t\t{parameters[i, 1]} = @{parameters[i, 1]},");
-            }
+                // ignore the parameter id because it will be in the last query with (WHERE).
+                if (column.NumberOfColumn == 1)
+                    continue;
 
-            sb.AppendLine($"\tWHERE {parameters[0, 1]} = @{parameters[0, 1]};");
+                sb.Append($"    {column.ColumnName} = @{column.ColumnName}");
+
+                if (column.NumberOfColumn < tableInfo.Columns.Count)
+                    sb.AppendLine(", ");
+                else
+                    sb.AppendLine("");
+            }
+            sb.AppendLine($"\tWHERE {tableInfo.Columns.First().ColumnName} = @{tableInfo.Columns.First().ColumnName};");
             sb.AppendLine("END");
 
             return sb.ToString();
         }
 
-        public static string GenerateSP_DeleteCode(string tableName, string[,] parameters)
+        public static string SP_Delete(TableInfo tableInfo)
         {
             StringBuilder sb = new StringBuilder();
 
-            // if last character is 's' will be removed.
-            if (tableName[tableName.Length - 1].ToString().ToLower() == "s")
-                sb.AppendLine($"CREATE PROCEDURE SP_Delete{tableName.Remove(tableName.Length - 1)}");
+            
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"CREATE PROCEDURE SP_DeletePersonByID");
             else
-                sb.AppendLine($"CREATE PROCEDURE SP_Delete{tableName}");
-
-            // check if parameter is () or not.
-            if (parameters[0, 2] == "")
-            {
-                sb.AppendLine($"\t@{parameters[0, 1]} {parameters[0, 0].ToUpper()}");
-            }
-            else
-            {
-                sb.AppendLine($"\t@{parameters[0, 1]} {parameters[0, 0].ToUpper()}({parameters[0, 2]})");
-            }
-
+                sb.AppendLine($"CREATE PROCEDURE SP_Delete{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID");
+            // ID
+            sb.AppendLine($"    @{tableInfo.Columns.First().ColumnName} {tableInfo.Columns.First().DataType}");
             sb.AppendLine($"AS");
             sb.AppendLine($"BEGIN");
             sb.AppendLine($"");
-            sb.AppendLine($"      DELETE FROM {tableName} WHERE {parameters[0, 1]} = @{parameters[0, 1]}");
+            sb.AppendLine($"      DELETE FROM {tableInfo.TableName} WHERE {tableInfo.Columns.First().ColumnName} = @{tableInfo.Columns.First().ColumnName}");
             sb.AppendLine($"");
             sb.AppendLine($"END");
 
@@ -177,30 +152,21 @@ namespace Code_Generator_Business
             return sb.ToString();
         }
 
-        public static string GenerateSP_IsExistsCode(string tableName, string[,] parameters)
+        public static string SP_IsExists(TableInfo tableInfo)
         {
             StringBuilder sb = new StringBuilder();
 
-            // if last character is 's' will be removed.
-            if (tableName[tableName.Length - 1].ToString().ToLower() == "s")
-                sb.AppendLine($"CREATE PROCEDURE SP_Is{tableName.Remove(tableName.Length - 1)}Exists");
+            
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"CREATE PROCEDURE SP_IsPersonExists");
             else
-                sb.AppendLine($"CREATE PROCEDURE SP_Is{tableName}Exists");
-
-            // check if parameter is () or not.
-            if (parameters[0, 2] == "")
-            {
-                sb.AppendLine($"\t@{parameters[0, 1]} {parameters[0, 0].ToUpper()}");
-            }
-            else
-            {
-                sb.AppendLine($"\t@{parameters[0, 1]} {parameters[0, 0].ToUpper()}({parameters[0, 2]})");
-            }
-
+                sb.AppendLine($"CREATE PROCEDURE SP_Is{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}Exists");
+            // ID
+            sb.AppendLine($"    @{tableInfo.Columns.First().ColumnName} {tableInfo.Columns.First().DataType}");
             sb.AppendLine($"AS");
             sb.AppendLine($"BEGIN");
             sb.AppendLine($"");
-            sb.AppendLine($"      IF EXISTS (SELECT FOUND = 1 FROM {tableName} WHERE {parameters[0, 1]} = @{parameters[0, 1]})");
+            sb.AppendLine($"      IF EXISTS (SELECT FOUND = 1 FROM {tableInfo.TableName} WHERE {tableInfo.Columns.First().ColumnName} = @{tableInfo.Columns.First().ColumnName})");
             sb.AppendLine($"            RETURN 1;");
             sb.AppendLine($"      ELSE");
             sb.AppendLine($"            RETURN 0;");
@@ -211,30 +177,20 @@ namespace Code_Generator_Business
             return sb.ToString();
         }
 
-        public static string GenerateSP_FindCode(string tableName, string[,] parameters)
+        public static string SP_Get(TableInfo tableInfo)
         {
             StringBuilder sb = new StringBuilder();
 
-            // if last character is 's' will be removed.
-            if (tableName[tableName.Length - 1].ToString().ToLower() == "s")
-                sb.AppendLine($"CREATE PROCEDURE SP_Find{tableName.Remove(tableName.Length - 1)}");
+            if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
+                sb.AppendLine($"CREATE PROCEDURE SP_GetPersonByID");
             else
-                sb.AppendLine($"CREATE PROCEDURE SP_Find{tableName}");
-
-            // check if parameter is () or not.
-            if (parameters[0, 2] == "")
-            {
-                sb.AppendLine($"\t@{parameters[0, 1]} {parameters[0, 0].ToUpper()}");
-            }
-            else
-            {
-                sb.AppendLine($"\t@{parameters[0, 1]} {parameters[0, 0].ToUpper()}({parameters[0, 2]})");
-            }
-
+                sb.AppendLine($"CREATE PROCEDURE SP_Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByID");
+            // ID
+            sb.AppendLine($"    @{tableInfo.Columns.First().ColumnName} {tableInfo.Columns.First().DataType}");
             sb.AppendLine($"AS");
             sb.AppendLine($"BEGIN");
             sb.AppendLine($"");
-            sb.AppendLine($"      SELECT * FROM {tableName} WHERE {parameters[0, 1]} = @{parameters[0, 1]}");
+            sb.AppendLine($"      SELECT * FROM {tableInfo.TableName} WHERE {tableInfo.Columns.First().ColumnName} = @{tableInfo.Columns.First().ColumnName}");
             sb.AppendLine($"");
             sb.AppendLine($"END");
 
@@ -242,19 +198,19 @@ namespace Code_Generator_Business
             return sb.ToString();
         }
 
-        public static string GenerateAll(string tableName, string[,] parameters)
+        public static string All(TableInfo tableInfo)
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(GenerateSP_AddNewCode(tableName, parameters));
+            sb.AppendLine(SP_AddNew(tableInfo));
             sb.AppendLine("\n-- ========================================================================\n");
-            sb.AppendLine(GenerateSP_UpdateCode(tableName, parameters));
+            sb.AppendLine(SP_Update(tableInfo));
             sb.AppendLine("\n-- ========================================================================\n");
-            sb.AppendLine(GenerateSP_FindCode(tableName, parameters));
+            sb.AppendLine(SP_Get(tableInfo));
             sb.AppendLine("\n-- ========================================================================\n");
-            sb.AppendLine(GenerateSP_DeleteCode(tableName, parameters));
+            sb.AppendLine(SP_Delete(tableInfo));
             sb.AppendLine("\n-- ========================================================================\n");
-            sb.AppendLine(GenerateSP_IsExistsCode(tableName, parameters));
+            sb.AppendLine(SP_IsExists(tableInfo));
 
             return sb.ToString();
         }

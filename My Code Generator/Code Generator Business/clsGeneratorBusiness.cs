@@ -1,39 +1,40 @@
 ﻿using Generator_Code_Data;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Code_Generator_Business
 {
     public class clsGeneratorBusiness
     {
-        private static string GetExpression(string dataType)
+        private static string GetDataType(string sqlType)
         {
-            switch (dataType.ToLower())
+            switch (sqlType.ToLower())
             {
-                case "int":
-                    return "(int)";
-                case "string":
-                    return "(string)";
-                case "bool":
-                    return "(bool)";
-                case "byte":
-                    return "(byte)";
-                case "short":
-                    return "(short)";
-                case "long":
-                    return "(long)";
+                case "bit": return "bool";
+                case "tinyint": return "byte";
+                case "smallint": return "short";
+                case "int": return "int";
+                case "bigint": return "long";
                 case "decimal":
-                    return "(decimal)";
-                case "double":
-                    return "(double)";
-                case "float":
-                    return "(float)";
+                case "numeric": return "decimal";
+                case "money":
+                case "smallmoney": return "decimal";
+                case "float": return "double";
+                case "real": return "float";
                 case "datetime":
-                    return "(DateTime)";
-                case "byte[]":
-                    return "(byte[])";
-                default:
-                    return "(object)";
+                case "smalldatetime":
+                case "date": return "DateTime";
+                case "char":
+                case "nchar":
+                case "varchar":
+                case "nvarchar":
+                case "text":
+                case "ntext": return "string";
+                case "binary":
+                case "varbinary":
+                case "image": return "byte[]";
+                default: return "object"; // Fallback to the general object type
             }
         }
 
@@ -96,12 +97,13 @@ namespace Code_Generator_Business
                 }
 
                 // attr [MaxLength].
-                if (column.DataType == "string")
+                string dataType = GetDataType(column.DataType);
+                if (dataType == "string")
                 {
                     sb.AppendLine($"[MaxLength({column.MaxCharacters}, ErrorMessage = \"{column.ColumnName} cannot exceed {column.MaxCharacters} characters.\")]");
                 }
 
-                sb.Append($"public {column.DataType}");
+                sb.Append($"public {dataType}");
                 // if Nullable add '?'.
                 if (column.IsNullable)
                     sb.Append("? ");
@@ -113,7 +115,7 @@ namespace Code_Generator_Business
                 if (column.IsNullable)
                     sb.Append("// allow null. ");
 
-                if (column.DataType == "string")
+                if (dataType == "string")
                     sb.AppendLine($"// Length: {column.MaxCharacters}");
             }
 
