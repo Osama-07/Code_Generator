@@ -93,7 +93,7 @@ namespace Code_Generator_Business
             // Constructor.
             foreach (var column in tableInfo.Columns)
             {
-                sb.Append($"{column.DataType}");
+                sb.Append($"{GetDataType(column.DataType)}");
                 // if Nullable add '?'.
                 if (column.IsNullable)
                     sb.Append("? ");
@@ -150,8 +150,8 @@ namespace Code_Generator_Business
                 if (dataType == "string")
                     sb.AppendLine($"// Length: {column.MaxCharacters}");
                 
-                sb.AppendLine("}");
             }
+            sb.AppendLine("}");
 
             return sb.ToString();
         }
@@ -386,7 +386,7 @@ namespace Code_Generator_Business
             if (tableInfo.TableName == "People" || tableInfo.TableName == "Pepole")
                 sb.AppendLine($"public static async Task<PeopleDTO?> GetPersonByIDAsync(int? id)");
             else
-                sb.AppendLine($"public static {tableInfo.TableName}DTO? Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(int? id)");
+                sb.AppendLine($"public static async Task<{tableInfo.TableName}DTO?> Get{tableInfo.TableName.Remove(tableInfo.TableName.Length - 1)}ByIDAsync(int? id)");
             sb.AppendLine("{");
             sb.AppendLine($"    if (id < 0) return null; // check {tableInfo.Columns.First().ColumnName} maybe data is not correct.");
             sb.AppendLine("");
